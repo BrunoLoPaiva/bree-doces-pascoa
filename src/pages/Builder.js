@@ -35,17 +35,17 @@ export default function Builder() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-zinc-50">
+    <div className="flex flex-col lg:flex-row w-full h-[100dvh] bg-zinc-50 overflow-hidden relative">
       {/* Lado Esquerdo - Fixo com o Ovo 3D */}
       <div
-        className="lg:w-1/2 lg:fixed lg:top-0 lg:left-0 lg:h-screen bg-zinc-950 relative h-[50vh] w-full"
+        className="w-full h-[45dvh] lg:h-full lg:w-1/2 bg-zinc-950 flex-shrink-0 relative z-10"
       >
         <EggViewer pedido={pedido} />
       </div>
 
       {/* Lado Direito - Rolagem com as Opções */}
       <div
-        className="lg:w-1/2 lg:ml-auto w-full p-6 lg:p-12 xl:p-20 pb-40 overflow-y-auto"
+        className="w-full flex-1 lg:w-1/2 overflow-y-auto p-5 pb-32 lg:p-12 xl:p-20 lg:pb-40 bg-zinc-50 relative z-20 rounded-t-[2rem] -mt-8 lg:mt-0 lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.15)] lg:shadow-none"
       >
         <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5 }}>
           <h2 className="text-2xl font-medium mb-6 text-zinc-800">1. Sabor da Casca</h2>
