@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-zinc-50 text-zinc-900 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-zinc-100;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-zinc-400;
+}
