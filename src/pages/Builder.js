@@ -1,7 +1,6 @@
 // src/pages/Builder.js
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import EggViewer from "../components/EggViewer";
 import OptionCard from "../components/OptionCard";
 import Summary from "../components/Summary";
 
@@ -35,21 +34,21 @@ export default function Builder() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full h-[100dvh] bg-zinc-50 overflow-hidden relative">
-      {/* Lado Esquerdo - Fixo com o Ovo 3D */}
-      <div
-        className="w-full h-[45dvh] lg:h-full lg:w-1/2 bg-zinc-950 flex-shrink-0 relative z-10"
-      >
-        <EggViewer pedido={pedido} />
-      </div>
+    <div className="flex flex-col w-full min-h-[100dvh] bg-zinc-950 overflow-x-hidden relative text-zinc-100">
+      {/* Background gradients similar to Hero */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(168,111,72,0.1),transparent_50%),radial-gradient(circle_at_70%_70%,rgba(212,189,170,0.05),transparent_50%)] pointer-events-none" />
 
-      {/* Lado Direito - Rolagem com as Opções */}
-      <div
-        className="w-full flex-1 lg:w-1/2 overflow-y-auto p-5 pb-32 lg:p-12 xl:p-20 lg:pb-40 bg-zinc-50 relative z-20 rounded-t-[2rem] -mt-8 lg:mt-0 lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.15)] lg:shadow-none"
-      >
+      <div className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-12 lg:p-20 pb-40">
+        <header className="mb-12 border-b border-zinc-900 pb-12">
+            <h1 className="text-4xl md:text-5xl font-light tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-orange-100 to-orange-400 mb-4 drop-shadow-sm">
+                Monte seu Ovo
+            </h1>
+            <p className="text-zinc-400 text-lg font-light tracking-wide">Personalize cada detalhe da sua experiência artesanal.</p>
+        </header>
+
         <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5 }}>
-          <h2 className="text-2xl font-medium mb-6 text-zinc-800">1. Sabor da Casca</h2>
-          <div className="grid grid-cols-2 gap-4 lg:gap-6">
+          <h2 className="text-2xl font-medium mb-6 text-zinc-200">1. Sabor da Casca</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {saboresCasca.map((s) => (
               <OptionCard
                 key={s.id}
@@ -61,9 +60,9 @@ export default function Builder() {
           </div>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5, delay: 0.1 }} className="mt-12">
-          <h2 className="text-2xl font-medium mb-6 text-zinc-800">2. Textura da Casca</h2>
-          <div className="grid grid-cols-2 gap-4 lg:gap-6">
+        <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5, delay: 0.1 }} className="mt-16">
+          <h2 className="text-2xl font-medium mb-6 text-zinc-200">2. Textura da Casca</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {tiposCasca.map((t) => (
               <OptionCard
                 key={t.id}
@@ -75,9 +74,9 @@ export default function Builder() {
           </div>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5, delay: 0.2 }} className="mt-12">
-          <h2 className="text-2xl font-medium mb-6 text-zinc-800">3. Estilo do Ovo</h2>
-          <div className="grid grid-cols-2 gap-4 lg:gap-6">
+        <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5, delay: 0.2 }} className="mt-16">
+          <h2 className="text-2xl font-medium mb-6 text-zinc-200">3. Estilo do Ovo</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {tiposOvo.map((t) => (
               <OptionCard
                 key={t.id}
@@ -96,10 +95,10 @@ export default function Builder() {
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: "auto" }} 
               exit={{ opacity: 0, height: 0 }} 
-              className="mt-12 overflow-hidden"
+              className="mt-16 overflow-hidden"
             >
-              <h2 className="text-2xl font-medium mb-6 text-zinc-800">4. Escolha o Recheio</h2>
-              <div className="grid grid-cols-2 gap-4 lg:gap-6">
+              <h2 className="text-2xl font-medium mb-6 text-zinc-200">4. Escolha o Recheio</h2>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                 {recheios.map((r) => (
                   <OptionCard
                     key={r.id}
@@ -120,10 +119,10 @@ export default function Builder() {
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: "auto" }} 
               exit={{ opacity: 0, height: 0 }} 
-              className="mt-12 overflow-hidden"
+              className="mt-16 overflow-hidden"
             >
-              <h2 className="text-2xl font-medium mb-6 text-zinc-800">5. Cobertura (Toppings)</h2>
-              <div className="grid grid-cols-2 gap-4 lg:gap-6">
+              <h2 className="text-2xl font-medium mb-6 text-zinc-200">5. Cobertura (Toppings)</h2>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                 {coberturas.map((c) => (
                   <OptionCard
                     key={c.id}
@@ -137,8 +136,8 @@ export default function Builder() {
           )}
         </AnimatePresence>
 
-        <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5, delay: 0.3 }} className="mt-12 border-t border-zinc-200 pt-12">
-          <h2 className="text-2xl font-medium mb-6 text-zinc-800">Tamanho (Peso)</h2>
+        <motion.div initial="hidden" animate="visible" variants={sectionVariants} transition={{ duration: 0.5, delay: 0.3 }} className="mt-16 border-t border-zinc-900 pt-16">
+          <h2 className="text-2xl font-medium mb-6 text-zinc-200">Tamanho (Peso)</h2>
           <div className="flex flex-wrap gap-4">
             {tamanhos.map((t) => (
               <button
@@ -146,8 +145,8 @@ export default function Builder() {
                 onClick={() => select("tamanho", t.id)}
                 className={`px-8 py-3 rounded-full font-medium transition-all duration-300 ease-out border-none ${
                   pedido.tamanho === t.id
-                    ? "bg-zinc-900 text-white shadow-xl shadow-zinc-900/20 scale-105"
-                    : "bg-white text-zinc-600 ring-1 ring-zinc-200 hover:ring-zinc-300 hover:bg-zinc-50"
+                    ? "bg-orange-500 text-white shadow-xl shadow-orange-500/20 scale-105"
+                    : "bg-zinc-900 text-zinc-400 ring-1 ring-zinc-800 hover:ring-zinc-700 hover:bg-zinc-800"
                 }`}
               >
                 {t.nome}

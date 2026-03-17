@@ -70,8 +70,8 @@ export default function Summary({ pedido }) {
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 w-full bg-white lg:bg-white/90 lg:backdrop-blur-md rounded-t-3xl p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 
-        lg:bottom-10 lg:right-10 lg:left-auto lg:w-80 lg:rounded-3xl lg:p-6 lg:shadow-2xl ring-1 ring-zinc-200/50 flex flex-col"
+        className="fixed bottom-0 left-0 w-full bg-zinc-900 lg:bg-zinc-900/90 lg:backdrop-blur-md rounded-t-3xl p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] z-50 
+        lg:bottom-10 lg:right-10 lg:left-auto lg:w-80 lg:rounded-3xl lg:p-6 lg:shadow-2xl ring-1 ring-zinc-800 flex flex-col"
       >
         {/* Cabeçalho mobile (clicável para expandir) / Fixo no desktop */}
         <div 
@@ -81,37 +81,37 @@ export default function Summary({ pedido }) {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="text-orange-500 w-5 h-5" />
-              <h3 className="font-semibold text-lg text-zinc-900 leading-none mt-0.5">Seu Pedido</h3>
+              <h3 className="font-semibold text-lg text-zinc-100 leading-none mt-0.5">Seu Pedido</h3>
             </div>
             {/* Mostrar o total resumido quando colapsado no mobile */}
             {!isExpanded && (
-               <span className="text-zinc-500 text-sm mt-1 lg:hidden">
+               <span className="text-zinc-400 text-sm mt-1 lg:hidden">
                  R$ {precoTotal.toFixed(2).replace('.', ',')}
                </span>
             )}
           </div>
           <motion.div 
             animate={{ rotate: isExpanded ? 180 : 0 }} 
-            className="lg:hidden bg-zinc-100 p-1.5 rounded-full group-hover:bg-zinc-200 transition-colors"
+            className="lg:hidden bg-zinc-800 p-1.5 rounded-full group-hover:bg-zinc-700 transition-colors"
           >
-            <ChevronUp className="w-4 h-4 text-zinc-600" />
+            <ChevronUp className="w-4 h-4 text-zinc-400" />
           </motion.div>
         </div>
 
         {/* Lista de Itens (Colapsável no mobile, sempre visível no desktop) */}
         <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[50vh] opacity-100 mb-6' : 'max-h-0 opacity-0 lg:max-h-none lg:opacity-100 lg:mb-6 overflow-hidden lg:overflow-visible'}`}>
-          <div className="bg-zinc-50 rounded-xl p-4 overflow-y-auto text-sm text-zinc-600 ring-1 ring-zinc-100 max-h-[40vh] lg:max-h-[25vh]">
+          <div className="bg-zinc-800/50 rounded-xl p-4 overflow-y-auto text-sm text-zinc-400 ring-1 ring-zinc-800 max-h-[40vh] lg:max-h-[25vh]">
             {Object.entries(pedido).map(([key, value]) => (
-              <div key={key} className="flex justify-between py-1.5 border-b border-zinc-200 last:border-0 hover:bg-zinc-100 transition-colors rounded-sm px-1">
+              <div key={key} className="flex justify-between py-1.5 border-b border-zinc-800 last:border-0 hover:bg-zinc-800 transition-colors rounded-sm px-1">
                 <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                <span className="font-medium text-zinc-900 text-right">{getNomeOpcao(key, value)}</span>
+                <span className="font-medium text-zinc-100 text-right">{getNomeOpcao(key, value)}</span>
               </div>
             ))}
           </div>
           
           <div className="mt-4 flex items-end justify-between px-1">
-            <span className="text-zinc-600 font-medium">Total Estimado</span>
-            <span className="text-2xl font-bold text-orange-600">
+            <span className="text-zinc-400 font-medium">Total Estimado</span>
+            <span className="text-2xl font-bold text-orange-400">
               R$ {precoTotal.toFixed(2).replace('.', ',')}
             </span>
           </div>

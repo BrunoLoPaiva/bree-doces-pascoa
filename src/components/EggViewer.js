@@ -47,16 +47,49 @@ function createCrocanteTexture() {
 }
 
 /* =====================================================
+   TEXTURA PROCEDURAL DO RECHEIO / COBERTURA
+===================================================== */
+function createRecheioTexture() {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#888";
+  ctx.fillRect(0, 0, size, size);
+
+  // Criando elevações suaves para parecer creme/brigadeiro
+  for (let i = 0; i < 5000; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const r = Math.random() * 6 + 2;
+    const shade = Math.random() > 0.5 ? 255 : 0;
+    ctx.fillStyle = `rgba(${shade},${shade},${shade}, 0.05)`;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(3, 3);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/* =====================================================
    TOPPINGS (COBERTURAS MAIS REALISTAS)
 ===================================================== */
 
 function Toppings({ tipo }) {
-  // Quantidades ajustadas por tipo para não pesar e parecer natural
-  const count = tipo === "confete" ? 60 : 35;
+  // Quantidades drasticamente aumentadas para preencher o ovo inteiro
+  const count = tipo === "confete" ? 200 : 90;
   const meshes = [];
 
   for (let i = 0; i < count; i++) {
-    const r = Math.sqrt(Math.random()) * 0.88;
+    const r = Math.sqrt(Math.random()) * 0.92; // Vai quase até a borda
     const theta = Math.random() * Math.PI * 2;
 
     const x = r * Math.cos(theta);
@@ -119,17 +152,21 @@ function Toppings({ tipo }) {
       geometry = <cylinderGeometry args={[0.06, 0.06, 0.025, 24]} />;
     }
 
+    // Empilhamento natural: altera a altura no eixo Z (profundidade) baseado na proximidade do centro e no random
+    // Isso cria um montinho mais alto no meio e espalhado nas bordas
+    const zOffset = (1 - r) * 0.08 + Math.random() * 0.05;
+
     meshes.push(
       <mesh
         key={i}
-        position={[x, y, tipo === "confete" ? 0.02 : 0.03 + Math.random() * 0.02]}
+        position={[x, y, tipo === "confete" ? 0.01 + zOffset / 2 : 0.02 + zOffset]}
         rotation={[
           // Rotações mais naturais dependendo do doce
-          tipo === "confete" ? 0 : Math.random() * Math.PI,
-          tipo === "confete" ? 0 : Math.random() * Math.PI,
+          tipo === "confete" ? Math.random() * 0.2 : Math.random() * Math.PI,
+          tipo === "confete" ? Math.random() * 0.2 : Math.random() * Math.PI,
           Math.random() * Math.PI,
         ]}
-        scale={tipo === "confete" ? [1, 1, 0.5] : [1, 1, 1]} // Achata o confete
+        scale={tipo === "confete" ? [1, 1, 0.4] : [0.8, 0.8, 0.8]} // Achata o confete
         castShadow
         receiveShadow
       >
@@ -148,6 +185,7 @@ function Toppings({ tipo }) {
 
 function Ovo({ pedido }) {
   const crocanteTexture = useMemo(() => createCrocanteTexture(), []);
+  const recheioTexture = useMemo(() => createRecheioTexture(), []);
 
   const corCasca =
     pedido.saborCasca === "branco"
@@ -253,9 +291,11 @@ function Ovo({ pedido }) {
                   <circleGeometry args={[0.96, 128]} />
                   <meshPhysicalMaterial
                     color={corRecheio}
-                    roughness={0.6}
-                    clearcoat={0.2}
-                    clearcoatRoughness={0.3}
+                    roughness={0.7}
+                    clearcoat={0.3}
+                    clearcoatRoughness={0.4}
+                    bumpMap={recheioTexture}
+                    bumpScale={0.03}
                   />
                 </mesh>
 
