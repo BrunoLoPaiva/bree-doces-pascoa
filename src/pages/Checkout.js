@@ -5,7 +5,7 @@ import { Trash2, ShoppingCart, MessageCircle, ArrowLeft, Plus } from "lucide-rea
 import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
-  const { cart, removeFromCart, totalCarrinho, clearCart } = useCart();
+  const { cart, removeFromCart, totalCarrinho } = useCart();
   const navigate = useNavigate();
   const whatsapp = "5514996917274";
 

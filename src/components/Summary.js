@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, CheckCircle2, ChevronUp, ShoppingCart, ArrowRight } from "lucide-react";
+import { CheckCircle2, ChevronUp, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { saboresCasca, tiposCasca, tiposOvo, recheios, coberturas, tamanhos } from "../data/options";
@@ -10,7 +10,6 @@ export default function Summary({ pedido }) {
   const [added, setAdded] = useState(false);
   const { cart, addToCart } = useCart();
   const navigate = useNavigate();
-  const whatsapp = "5514996917274";
 
   // Agrupa todas as opções para facilitar a busca do preço
   const allOptions = {
@@ -56,11 +55,6 @@ export default function Summary({ pedido }) {
     setTimeout(() => setAdded(false), 2000);
   }
 
-  function finalizar() {
-    // This is now moved to Checkout page, but kept here for reference or single item quick order?
-    // Actually, following the plan, Checkout handles it.
-    navigate("/checkout");
-  }
 
   return (
     <>
