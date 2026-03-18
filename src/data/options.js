@@ -48,3 +48,17 @@ export const tamanhos = [
   { id: "300", nome: "300g", preco: 70 },
   { id: "500", nome: "500g", preco: 95 },
 ];
+
+export const getNomeOpcao = (categoria, id) => {
+  const allOptions = {
+    saborCasca: saboresCasca,
+    tipoCasca: tiposCasca,
+    tipoOvo: tiposOvo,
+    recheio: recheios,
+    cobertura: coberturas,
+    tamanho: tamanhos,
+  };
+  if (!allOptions[categoria]) return id;
+  const opcao = allOptions[categoria].find(opt => opt.id === id);
+  return opcao ? opcao.nome : id;
+};

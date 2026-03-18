@@ -6,30 +6,32 @@ export default function OptionCard({ option, selected, onClick }) {
       onClick={onClick}
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
-      className={`relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ease-out shadow-sm ${
+      className={`relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 ease-out shadow-sm border ${
         selected
-          ? "ring-4 ring-orange-400 shadow-md shadow-orange-900/40"
-          : "hover:shadow-lg bg-zinc-900 ring-1 ring-zinc-800"
+          ? "ring-2 ring-rose-300 bg-rose-50/30 border-rose-200 shadow-md"
+          : "hover:shadow-md bg-white border-rose-50 hover:border-rose-100"
       }`}
     >
-      <div className="aspect-video w-full overflow-hidden bg-zinc-800">
+      <div className="aspect-video w-full overflow-hidden bg-rose-50/50">
         <img
           src={option.img}
           alt={option.nome}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         />
       </div>
-      <div className="p-3 lg:p-4 bg-zinc-900 relative z-10">
-        <h3 className="text-sm xl:text-base font-medium text-zinc-100 leading-tight">{option.nome}</h3>
+      <div className="p-3 lg:p-4 bg-white relative z-10">
+        <h3 className="text-sm xl:text-base font-semibold text-[#5A2C1D] leading-tight font-sans">
+          {option.nome}
+        </h3>
         {option.preco > 0 && (
-          <span className="text-[11px] xl:text-sm text-orange-400 font-medium mt-0.5 inline-block">
-            +R$ {option.preco.toFixed(2)}
+          <span className="text-[11px] xl:text-sm text-[#E5989B] font-bold mt-1 inline-block">
+            + R$ {option.preco.toFixed(2).replace('.', ',')}
           </span>
         )}
       </div>
-      {/* Check/Glow overlay if selected */}
+      {/* Soft overlay if selected */}
       {selected && (
-        <div className="absolute inset-0 bg-orange-400/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-rose-300/5 pointer-events-none" />
       )}
     </motion.div>
   );

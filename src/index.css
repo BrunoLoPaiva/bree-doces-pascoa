@@ -1,22 +1,37 @@
 /* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-zinc-950 text-white antialiased;
-    font-family: "Inter", sans-serif; /* Uma fonte limpa e moderna */
+    @apply bg-[#FFF9FA] text-[#5A2C1D] antialiased;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
   }
 }
 
-/* Scrollbar sutil para o visual premium */
+@keyframes bg-pan {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-500px); } /* Velocidade e distância lentas */
+}
+
+.animate-bg-pan {
+  animation: bg-pan 40s linear infinite; /* Muito lento e contínuo */
+}
+
+/* Custom scrollbar for the soft theme */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-zinc-900;
+  @apply bg-rose-50;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-zinc-700 rounded-full;
+  @apply bg-rose-200 rounded-full;
 }
