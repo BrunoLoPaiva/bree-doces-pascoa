@@ -2,34 +2,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // 🐾 SVG da pegada
-const RabbitFootprintSVG = ({ rotation = "rotate(0deg)" }) => {
+const RabbitFootprintSVG = ({ rotation = "rotate(0deg)", scale = 1.2 }) => {
   // Paleta adaptada ao fundo do projeto (bg-[#FFF9FA])
-  const corLuz = "#FFFFFF"; // Brilho puro para a borda que recebe luz
-  const corSombra = "#c9a5a8ff"; // Um rosa/marrom bem acinzentado e clarinho para a sombra
-  const corFundo = "#FFF9FA"; // Exatamente a mesma cor do fundo do site
+  const corLuz = "#FFFFFF"; 
+  const corSombra = "#c9a5a8ff"; 
+  const corFundo = "#FFF9FA"; 
+
+  // Tamanho base do SVG
+  const baseSize = 24;
 
   return (
     <svg 
-      width="24" 
-      height="24" 
+      width={baseSize * scale} 
+      height={baseSize * scale} 
       viewBox="0 0 24 24" 
       fill="none" 
-      // A rotação continua funcionando perfeitamente
       style={{ transform: rotation }}
     >
-      {/* CAMADA 1: Luz (levemente mais clara) - Deslocada para baixo/direita */}
       <ellipse cx="12.5" cy="18.5" rx="4" ry="5" fill={corLuz} />
       <ellipse cx="7.5" cy="10" rx="2" ry="2.5" fill={corLuz} />
       <ellipse cx="12.5" cy="8" rx="2" ry="2.5" fill={corLuz} />
       <ellipse cx="17.5" cy="10" rx="2" ry="2.5" fill={corLuz} /> 
       
-      {/* CAMADA 2: Sombra interna (levemente mais escura) - Deslocada para cima/esquerda */}
       <ellipse cx="11.5" cy="17.5" rx="4" ry="5" fill={corSombra} />
       <ellipse cx="6.5" cy="9" rx="2" ry="2.5" fill={corSombra} />
       <ellipse cx="11.5" cy="7" rx="2" ry="2.5" fill={corSombra} />
       <ellipse cx="16.5" cy="9" rx="2" ry="2.5" fill={corSombra} />  
       
-      {/* CAMADA 3: Fundo (Cor base) - Centralizada, criando o "fundo" do buraco */}
       <ellipse cx="12" cy="18" rx="4" ry="5" fill={corFundo} />
       <ellipse cx="7" cy="9.5" rx="2" ry="2.5" fill={corFundo} />
       <ellipse cx="12" cy="7.5" rx="2" ry="2.5" fill={corFundo} />
@@ -38,15 +37,17 @@ const RabbitFootprintSVG = ({ rotation = "rotate(0deg)" }) => {
   );
 };
 
-const MAX_TRAIL_LENGTH = 24; 
+const MAX_TRAIL_LENGTH = 20; 
 
-export default function BackgroundTrail() {
+
+export default function BackgroundTrail({ scale = 1.2 }) {
   const [trail, setTrail] = useState([]);
 
-  const posRef = useRef({ x: 50, y: 90 });
+  
+
+  const posRef = useRef({ x: Math.random() * 100, y: Math.random() * 100 });
   const angleRef = useRef(-Math.PI / 2);
   
-  // 🐇 ref atualizado para controlar o ritmo E a alternância das patas
   const sequenceRef = useRef({ 
     pulosDados: 0, 
     metaDePulos: Math.random() * 3 + 3,
@@ -83,11 +84,7 @@ export default function BackgroundTrail() {
         }
 
         const perpAngle = bounceAngle + Math.PI / 2;
-
-        // 🐾 AJUSTE DAS PATAS
         const footOffset = 1.4; 
-        
-        // Multiplica o avanço base (1.2) pelo sinal atual (1 ou -1)
         const currentStagger = 0.8 * sequenceRef.current.staggerSign; 
         const outwardTilt = -0.3; 
 
@@ -123,10 +120,7 @@ export default function BackgroundTrail() {
           : updated;
       });
 
-      // Inverte o sinal para o próximo pulo (1 vira -1, -1 vira 1)
       sequenceRef.current.staggerSign *= -1;
-
-      // 🕒 LÓGICA DO RITMO
       sequenceRef.current.pulosDados += 1;
       let nextDelay;
 
@@ -134,7 +128,7 @@ export default function BackgroundTrail() {
         nextDelay = 1000 + Math.random() * 1000; 
         sequenceRef.current.pulosDados = 0; 
         sequenceRef.current.metaDePulos = Math.floor(Math.random() * 2) + 3; 
-      } else {
+        } else {
         nextDelay = 350 + Math.random() * 100; 
       }
 
@@ -162,7 +156,8 @@ export default function BackgroundTrail() {
               opacity: stepOpacity
             }}
           >
-            <RabbitFootprintSVG rotation={step.rotation} />
+            {/* 2. Agora repassamos a prop "scale" dinâmica em vez do número 5 fixo */}
+            <RabbitFootprintSVG rotation={step.rotation} scale={scale} />
           </div>
         );
       })}

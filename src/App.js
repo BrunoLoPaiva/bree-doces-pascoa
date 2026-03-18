@@ -15,6 +15,7 @@ export default function App() {
           
           {/* O fundo animado fica aqui, atrás de tudo */}
           <BackgroundElevator />
+          <BackgroundElevator />
           
           {/* As rotas ficam em cima do fundo */}
           <Routes>          

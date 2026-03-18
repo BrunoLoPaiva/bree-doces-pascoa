@@ -47,7 +47,7 @@ export default function Hero({ start }) {
             <img
               src="coelho.png"
               alt="Coelhinho da Páscoa com cesta"
-              className="w-full h-auto max-h-[35vh] md:max-h-[55vh] object-contain drop-shadow-2xl"
+              className="w-full h-auto max-h-[35vh] md:max-h-[65vh] object-contain drop-shadow-2xl transition-transform lg:scale-110 lg:mb-10"
               style={{ filter: "drop-shadow(0px 20px 30px rgba(90, 44, 29, 0.12))" }}
             />
           </motion.div>
