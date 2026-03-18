@@ -49,8 +49,8 @@ export default function BackgroundTrail() {
   // 🐇 ref atualizado para controlar o ritmo E a alternância das patas
   const sequenceRef = useRef({ 
     pulosDados: 0, 
-    metaDePulos: 3,
-    staggerSign: 1 // Começa com 1 (pata direita à frente)
+    metaDePulos: Math.random() * 3 + 3,
+    staggerSign: 1 
   });
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function BackgroundTrail() {
         const perpAngle = bounceAngle + Math.PI / 2;
 
         // 🐾 AJUSTE DAS PATAS
-        const footOffset = 0.8; 
+        const footOffset = 1.4; 
         
         // Multiplica o avanço base (1.2) pelo sinal atual (1 ou -1)
         const currentStagger = 0.8 * sequenceRef.current.staggerSign; 
