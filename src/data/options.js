@@ -44,8 +44,10 @@ export const coberturas = [
 ];
 
 export const tamanhos = [
-  { id: "150", nome: "150g", preco: 45 },
-  { id: "300", nome: "300g", preco: 70 },
+  { id: "50", nome: "50g", preco: 8 },
+  { id: "150", nome: "150g", preco: 20 },
+  { id: "250", nome: "250g", preco: 40 },
+  { id: "350", nome: "350g", preco: 70 },
   { id: "500", nome: "500g", preco: 95 },
 ];
 
