@@ -122,9 +122,15 @@ export default function Builder() {
                       ? "bg-[#E5989B] text-white shadow-lg scale-[1.03]"
                       : "bg-white text-[#8C7A70] ring-1 ring-rose-100 hover:bg-rose-50"
                   }
+                  flex flex-col items-center justify-center
                 `}
               >
-                {t.nome}
+                <span>{t.nome}</span>
+                <span
+                  className={`text-xs mt-1 ${pedido.tamanho === t.id ? "text-white/90" : "text-[#8C7A70]/70"}`}
+                >
+                  R$ {t.baseLisa.toFixed(2).replace(".", ",")}
+                </span>
               </button>
             ))}
           </div>
@@ -208,7 +214,13 @@ export default function Builder() {
           },
           {
             title: `${stepTextura}. Textura da Casca`,
-            data: tiposCasca,
+            data: tiposCasca.map((tc) => {
+              if (tc.id === "crocante") {
+                const tamAtual = tamanhos.find((t) => t.id === pedido.tamanho);
+                return { ...tc, preco: tamAtual ? tamAtual.adcCrocante : 0 };
+              }
+              return tc;
+            }),
             key: "tipoCasca",
           },
         ].map((section) => (
