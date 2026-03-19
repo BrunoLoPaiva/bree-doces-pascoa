@@ -167,6 +167,18 @@ export const coberturas = [
     precos: { 50: 2.0, 150: 4.5, 250: 7.0, 350: 9.0, 500: 12.0 },
     img: "https://t4.ftcdn.net/jpg/03/40/59/61/360_F_340596198_RZ7WYwBq4LI12BfJZEE2AMOfWv0zNJOf.jpg",
   },
+  {
+    id: "granule",
+    nome: "Granule",
+    precos: { 50: 1, 150: 2, 250: 3, 350: 4, 500: 5 },
+    img: "https://docemalu.vtexassets.com/arquivos/ids/5368117-800-auto?v=639021241434670000&width=800&height=auto&aspect=true",
+  },
+  {
+    id: "amendoin",
+    nome: "Amendoin",
+    precos: { 50: 1, 150: 2, 250: 3, 350: 4, 500: 5 },
+    img: "https://inovanuts.cdn.magazord.com.br/img/2023/03/produto/457/granulado-de-amendoim.jpg",
+  },
 ];
 
 // Valores base atualizados pela tabela da imagem
