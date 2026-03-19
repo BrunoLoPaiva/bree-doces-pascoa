@@ -18,49 +18,55 @@ export default function Checkout() {
 
   function finalizarPedido() {
     let msg =
-      " *Olá, Bree Doces!* Gostaria de fazer o meu pedido de Páscoa:\n\n";
+      "*Olá, Bree Doces!* Gostaria de fazer o meu pedido de Páscoa:\n\n";
 
     cart.forEach((item, index) => {
       // Título do Item em Negrito
       const nomeTamanho = getNomeOpcao("tamanho", item.tamanho);
       const nomeTipo = getNomeOpcao("tipoOvo", item.tipoOvo);
-      msg += ` *ITEM #${index + 1} - ${nomeTamanho} ${nomeTipo}*\n`;
+      msg += `*ITEM #${index + 1} - ${nomeTamanho} ${nomeTipo}*\n`;
 
-      const addLine = (emoji, label, value) => {
-        if (value) msg += `${emoji} *${label}:* ${value}\n`;
+      // Função auxiliar corrigida (sem o parâmetro de emoji)
+      const addLine = (label, value) => {
+        if (value) msg += `*${label}:* ${value}\n`;
       };
 
       // Formato / Kit (Se não for tradicional)
       if (item.tipoOvo !== "tradicional") {
         if (item.kit && item.kit !== "unidade") {
-          msg += ` *Formato:* ${getNomeOpcao("kit", item.kit)} (Ovos idênticos na mesma embalagem)\n`;
+          addLine(
+            "Formato",
+            `${getNomeOpcao("kit", item.kit)} (Ovos idênticos na mesma embalagem)`,
+          );
         } else {
-          msg += ` *Formato:* Unidade\n`;
+          addLine("Formato", "Unidade");
         }
       }
 
       // Casca
-      addLine("Casca", getNomeOpcao("saborCasca", item.saborCasca));
-      addLine("Textura", getNomeOpcao("tipoCasca", item.tipoCasca));
+      addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
+      addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
 
       // Recheio e Cobertura
       if (item.tipoOvo !== "tradicional") {
         addLine("Recheio", getNomeOpcao("recheio", item.recheio));
       }
+
       if (item.tipoOvo === "colher") {
-        addLine("Cobertura", getNomeOpcao("cobertura", item.cobertura));
+        addLine("Topper/Cobertura", getNomeOpcao("cobertura", item.cobertura));
       }
 
-      msg += `Subtotal: R$ ${item.precoTotal.toFixed(2).replace(".", ",")}_\n\n`;
+      // Subtotal do item
+      msg += `Subtotal: R$ ${item.precoTotal.toFixed(2).replace(".", ",")}\n\n`;
     });
 
+    // Fechamento
     msg += `----------------------------------\n`;
-    msg += ` *TOTAL DO PEDIDO: R$ ${totalCarrinho.toFixed(2).replace(".", ",")}*\n\n`;
-    msg += `Aguardando confirmação e dados para pagamento! `;
+    msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinho.toFixed(2).replace(".", ",")}*\n\n`;
+    msg += `Aguardando confirmação e dados para pagamento!`;
 
     window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`);
   }
-
   if (cart.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-[#5A2C1D] p-6 relative overflow-hidden">
