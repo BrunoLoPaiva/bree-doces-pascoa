@@ -228,14 +228,15 @@ export default function Checkout() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-[#25D366] text-white py-5 px-10 rounded-full font-black text-xl shadow-xl flex items-center justify-center gap-4 hover:bg-[#1fb355] transition-all"
               >
-                <MessageCircle className="w-7 h-7" /> Finalizar no WhatsApp
+                <MessageCircle className="w-7 h-7" /> Finalizar pedido
               </motion.button>
-              
+
               {/* Quebra de Objeções */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs md:text-sm text-[#8C7A70] font-medium">
                 <div className="flex items-center gap-1.5">
                   <span className="text-lg">💳</span>
-                  Aceitamos Pix, Cartões de Débito e Crédito (sujeito a taxas das operadoras).
+                  Aceitamos Pix, Cartões de Débito e Crédito (sujeito a taxas
+                  das operadoras).
                 </div>
                 <div className="hidden sm:block opacity-20">|</div>
                 <div className="flex items-center gap-1.5">
@@ -250,7 +251,6 @@ export default function Checkout() {
               >
                 <Plus className="w-5 h-5" /> Adicionar outro ovo
               </button>
-
             </div>
           </div>
         </div>

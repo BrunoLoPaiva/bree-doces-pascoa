@@ -38,12 +38,17 @@ export default function Builder() {
         next.tipoOvo = "colher";
       }
 
-      if (
-        categoria === "tamanho" &&
-        (id === "350" || id === "500") &&
-        next.kit !== "unidade"
-      ) {
-        next.kit = "unidade";
+      if (categoria === "tamanho") {
+        const invalidKits = {
+          150: ["quarteto"],
+          250: ["dupla", "quarteto"],
+          350: ["dupla", "trio", "quarteto"],
+          500: ["dupla", "trio", "quarteto"],
+        }[id] || [];
+
+        if (invalidKits.includes(next.kit)) {
+          next.kit = "unidade";
+        }
       }
 
       return next;
@@ -200,32 +205,48 @@ export default function Builder() {
                     quarteto: 10,
                   }[k.id];
 
+                  const isKitAvailable = {
+                    unidade: true,
+                    dupla: ["50", "150"].includes(pedido.tamanho),
+                    trio: ["50", "150", "250"].includes(pedido.tamanho),
+                    quarteto: pedido.tamanho === "50",
+                  }[k.id];
+
                   return (
-                    <button
-                      key={k.id}
-                      onClick={() => select("kit", k.id)}
-                      className={`
-                        px-5 md:px-6 py-3 rounded-2xl font-semibold
-                        transition-all duration-200 text-sm md:text-base
-                        focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5989B]
-                        active:scale-95
-                        flex flex-col items-center
-                        ${
-                          pedido.kit === k.id
-                            ? "bg-[#E5989B] text-white shadow-lg scale-[1.03]"
-                            : "bg-white text-[#8C7A70] ring-1 ring-rose-100 hover:bg-rose-50"
-                        }
-                      `}
-                    >
-                      <span>{k.nome}</span>
-                      {savings && (
-                        <span
-                          className={`text-[10px] md:text-xs font-bold uppercase tracking-wider mt-0.5 ${pedido.kit === k.id ? "text-white/80" : "text-[#E5989B]"}`}
-                        >
-                          Economize R$ {savings.toFixed(2).replace(".", ",")}
-                        </span>
+                    <div key={k.id} className="relative">
+                      <button
+                        onClick={() => isKitAvailable && select("kit", k.id)}
+                        className={`
+                          px-5 md:px-6 py-3 rounded-2xl font-semibold
+                          transition-all duration-200 text-sm md:text-base
+                          focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5989B]
+                          active:scale-95
+                          flex flex-col items-center
+                          ${
+                            pedido.kit === k.id
+                              ? "bg-[#E5989B] text-white shadow-lg scale-[1.03]"
+                              : "bg-white text-[#8C7A70] ring-1 ring-rose-100 hover:bg-rose-50"
+                          }
+                          ${!isKitAvailable ? "opacity-40 cursor-not-allowed grayscale" : ""}
+                        `}
+                      >
+                        <span>{k.nome}</span>
+                        {savings && (
+                          <span
+                            className={`text-[10px] md:text-xs font-bold uppercase tracking-wider mt-0.5 ${pedido.kit === k.id ? "text-white/80" : "text-[#E5989B]"}`}
+                          >
+                            Economize R$ {savings.toFixed(2).replace(".", ",")}
+                          </span>
+                        )}
+                      </button>
+                      {!isKitAvailable && (
+                        <div className="absolute inset-x-0 -bottom-6 flex justify-center pointer-events-none whitespace-nowrap">
+                          <span className="text-[10px] text-[#E5989B] font-bold">
+                            Indisponível p/ {pedido.tamanho}g
+                          </span>
+                        </div>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>

@@ -170,7 +170,7 @@ export const coberturas = [
   {
     id: "granule",
     nome: "Granule",
-    precos: { 50: 1, 150: 2, 250: 3, 350: 4, 500: 5 },
+    precos: { 50: 1.5, 150: 2.5, 250: 3.5, 350: 4.5, 500: 5.5 },
     img: "https://docemalu.vtexassets.com/arquivos/ids/5368117-800-auto?v=639021241434670000&width=800&height=auto&aspect=true",
   },
   {
