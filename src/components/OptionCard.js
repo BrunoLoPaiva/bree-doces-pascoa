@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function OptionCard({ option, selected, onClick }) {
+export default function OptionCard({ option, selected, onClick, className = "" }) {
   return (
     <motion.div
       onClick={onClick}
@@ -10,7 +10,7 @@ export default function OptionCard({ option, selected, onClick }) {
         selected
           ? "ring-2 ring-rose-300 bg-rose-50/30 border-rose-200 shadow-md"
           : "hover:shadow-md bg-white border-rose-50 hover:border-rose-100"
-      }`}
+      } ${className}`}
     >
       <div className="aspect-video w-full overflow-hidden bg-rose-50/50">
         <img
@@ -19,16 +19,17 @@ export default function OptionCard({ option, selected, onClick }) {
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         />
       </div>
-      <div className="p-3 lg:p-4 bg-white relative z-10">
+      <div className="p-3 lg:p-4 bg-white relative z-10 flex flex-col items-start gap-2">
         <h3 className="text-sm xl:text-base font-semibold text-[#5A2C1D] leading-tight font-sans">
           {option.nome}
         </h3>
         {option.preco > 0 && (
-          <span className="text-[11px] xl:text-sm text-[#E5989B] font-bold mt-1 inline-block">
+          <span className="text-[10px] xl:text-xs text-[#5A2C1D] font-bold px-2 py-0.5 bg-rose-100 rounded-full">
             + R$ {option.preco.toFixed(2).replace('.', ',')}
           </span>
         )}
       </div>
+
       {/* Soft overlay if selected */}
       {selected && (
         <div className="absolute inset-0 bg-rose-300/5 pointer-events-none" />

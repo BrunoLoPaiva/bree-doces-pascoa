@@ -149,15 +149,27 @@ export default function Builder() {
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {tiposOvo.map((t) => {
-              if (t.id === "trufado" && pedido.tamanho === "50") return null;
+              const isUnavailable =
+                t.id === "trufado" && pedido.tamanho === "50";
 
               return (
-                <OptionCard
-                  key={t.id}
-                  option={t}
-                  selected={pedido.tipoOvo === t.id}
-                  onClick={() => select("tipoOvo", t.id)}
-                />
+                <div key={t.id} className="relative">
+                  <OptionCard
+                    option={t}
+                    selected={pedido.tipoOvo === t.id}
+                    onClick={() => !isUnavailable && select("tipoOvo", t.id)}
+                    className={
+                      isUnavailable ? "opacity-50 pointer-events-none" : ""
+                    }
+                  />
+                  {isUnavailable && (
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none z-20">
+                      <span className="bg-[#5A2C1D]/80 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm">
+                        Indisponível para 50g
+                      </span>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -181,25 +193,41 @@ export default function Builder() {
               </p>
 
               <div className="flex flex-wrap gap-3 md:gap-4">
-                {kits.map((k) => (
-                  <button
-                    key={k.id}
-                    onClick={() => select("kit", k.id)}
-                    className={`
-                      px-5 md:px-6 py-3 rounded-full font-semibold
-                      transition-all duration-200 text-sm md:text-base
-                      focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5989B]
-                      active:scale-95
-                      ${
-                        pedido.kit === k.id
-                          ? "bg-[#E5989B] text-white shadow-lg scale-[1.03]"
-                          : "bg-white text-[#8C7A70] ring-1 ring-rose-100 hover:bg-rose-50"
-                      }
-                    `}
-                  >
-                    {k.nome}
-                  </button>
-                ))}
+                {kits.map((k) => {
+                  const savings = {
+                    dupla: 3,
+                    trio: 5,
+                    quarteto: 10,
+                  }[k.id];
+
+                  return (
+                    <button
+                      key={k.id}
+                      onClick={() => select("kit", k.id)}
+                      className={`
+                        px-5 md:px-6 py-3 rounded-2xl font-semibold
+                        transition-all duration-200 text-sm md:text-base
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5989B]
+                        active:scale-95
+                        flex flex-col items-center
+                        ${
+                          pedido.kit === k.id
+                            ? "bg-[#E5989B] text-white shadow-lg scale-[1.03]"
+                            : "bg-white text-[#8C7A70] ring-1 ring-rose-100 hover:bg-rose-50"
+                        }
+                      `}
+                    >
+                      <span>{k.nome}</span>
+                      {savings && (
+                        <span
+                          className={`text-[10px] md:text-xs font-bold uppercase tracking-wider mt-0.5 ${pedido.kit === k.id ? "text-white/80" : "text-[#E5989B]"}`}
+                        >
+                          Economize R$ {savings.toFixed(2).replace(".", ",")}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </motion.div>
           )}

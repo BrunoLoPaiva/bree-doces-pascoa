@@ -98,7 +98,12 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen text-[#5A2C1D] p-6 md:p-12 lg:p-20 relative overflow-x-hidden">
+    <div className="min-h-screen text-[#5A2C1D] p-6 md:p-12 lg:p-20 relative overflow-x-hidden pt-16 md:pt-24">
+      {/* Banner de Escassez */}
+      <div className="absolute top-0 left-0 w-full bg-[#5A2C1D] text-white py-2 px-4 text-center text-xs md:text-sm font-bold z-50">
+        ⚠️ Só serão aceitos pedidos até 31/03! Garanta já o seu
+      </div>
+
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(244,194,194,0.1),transparent_50%)] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10">
@@ -225,12 +230,27 @@ export default function Checkout() {
               >
                 <MessageCircle className="w-7 h-7" /> Finalizar no WhatsApp
               </motion.button>
+              
+              {/* Quebra de Objeções */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs md:text-sm text-[#8C7A70] font-medium">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-lg">💳</span>
+                  Aceitamos Pix, Cartões de Débito e Crédito (sujeito a taxas das operadoras).
+                </div>
+                <div className="hidden sm:block opacity-20">|</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-lg">🛵</span>
+                  Consulte a taxa de entrega ou retire no local
+                </div>
+              </div>
+
               <button
                 onClick={() => navigate("/builder")}
-                className="text-[#8C7A70] hover:text-[#E5989B] font-bold flex items-center justify-center gap-2"
+                className="text-[#8C7A70] hover:text-[#E5989B] font-bold flex items-center justify-center gap-2 mt-2"
               >
                 <Plus className="w-5 h-5" /> Adicionar outro ovo
               </button>
+
             </div>
           </div>
         </div>

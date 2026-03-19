@@ -137,7 +137,12 @@ export default function Hero({ start }) {
 
   return (
     // REMOVIDO o bg-[#FDF9F6] para a animação do fundo poder aparecer
-    <section className="relative h-[100dvh] w-full flex flex-col items-center justify-center overflow-hidden text-[#5A2C1D] px-4 md:px-8 bg-transparent">
+    <section className="relative h-[100dvh] w-full flex flex-col items-center justify-center overflow-hidden text-[#5A2C1D] px-4 md:px-8 bg-transparent pt-12">
+      {/* Banner de Escassez */}
+      <div className="absolute top-0 left-0 w-full bg-[#5A2C1D] text-white py-2 px-4 text-center text-xs md:text-sm font-bold z-50">
+        ⚠️ Só serão aceitos pedidos até 31/03! Garanta já o seu
+      </div>
+
       {/* Background radial overlays */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(244,194,194,0.3),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(229,152,155,0.15),transparent_50%)] pointer-events-none" />
 

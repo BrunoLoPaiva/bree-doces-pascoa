@@ -136,6 +136,12 @@ export default function Summary({ pedido }) {
         {/* BOTÕES */}
         <div className="flex flex-col gap-2 md:gap-3">
           <motion.button
+            key={added ? "added" : "not-added"}
+            initial={added ? { scale: 0.95 } : { scale: 1 }}
+            animate={added ? { 
+              scale: [1, 1.1, 1],
+              transition: { type: "spring", stiffness: 400, damping: 10 }
+            } : { scale: 1 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleAddToCart}
@@ -160,6 +166,7 @@ export default function Summary({ pedido }) {
               <>Adicionar à cesta de ovos!</>
             )}
           </motion.button>
+
 
           {cart.length > 0 && (
             <button
