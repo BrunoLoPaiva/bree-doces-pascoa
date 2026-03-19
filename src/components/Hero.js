@@ -183,7 +183,7 @@ export default function Hero({ start }) {
             variants={itemVariants}
             className="text-sm sm:text-base lg:text-xl text-[#8C7A70] max-w-xl mb-8"
           >
-            Escolha cada detalhe do seu ovo — do chocolate aos recheios
+            Escolha cada detalhe do seu ovo, do chocolate aos recheios
             artesanais.
             <span className="block mt-2 font-medium text-[#E5989B]">
               Uma experiência única, feita só para você ou para presentear
