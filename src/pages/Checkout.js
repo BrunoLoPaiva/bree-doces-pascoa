@@ -1,7 +1,7 @@
 // src/pages/Checkout.js
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../context/CartContext";
-import { getNomeOpcao } from "../data/options";
+import { getNomeOpcao, recheios, coberturas } from "../data/options";
 import {
   Trash2,
   ShoppingCart,
@@ -21,46 +21,50 @@ export default function Checkout() {
       "*Olá, Bree Doces!* Gostaria de fazer o meu pedido de Páscoa:\n\n";
 
     cart.forEach((item, index) => {
-      // Título do Item em Negrito
       const nomeTamanho = getNomeOpcao("tamanho", item.tamanho);
       const nomeTipo = getNomeOpcao("tipoOvo", item.tipoOvo);
       msg += `*ITEM #${index + 1} - ${nomeTamanho} ${nomeTipo}*\n`;
 
-      // Função auxiliar corrigida (sem o parâmetro de emoji)
       const addLine = (label, value) => {
         if (value) msg += `*${label}:* ${value}\n`;
       };
-
-      // Formato / Kit (Se não for tradicional)
-      if (item.tipoOvo !== "tradicional") {
-        if (item.kit && item.kit !== "unidade") {
-          addLine(
-            "Formato",
-            `${getNomeOpcao("kit", item.kit)} (Ovos idênticos na mesma embalagem)`,
-          );
-        } else {
-          addLine("Formato", "Unidade");
-        }
-      }
 
       // Casca
       addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
       addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
 
-      // Recheio e Cobertura
+      // Kit e ovos individuais
       if (item.tipoOvo !== "tradicional") {
-        addLine("Recheio", getNomeOpcao("recheio", item.recheio));
+        const isKitMulti = item.ovos && item.ovos.length > 1;
+
+        if (isKitMulti) {
+          addLine("Formato", getNomeOpcao("kit", item.kit));
+          msg += `*Composição:*\n`;
+          item.ovos.forEach((ovo, i) => {
+            const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
+            const nomeCobertura = ovo.cobertura
+              ? ` + ${getNomeOpcao("cobertura", ovo.cobertura)}`
+              : "";
+            msg += `  Ovo ${i + 1}: ${nomeRecheio}${nomeCobertura}\n`;
+          });
+        } else {
+          // Ovo único
+          if (item.kit && item.kit !== "unidade") {
+            addLine("Formato", getNomeOpcao("kit", item.kit));
+          }
+          const ovoUnico = item.ovos?.[0];
+          if (ovoUnico) {
+            addLine("Recheio", getNomeOpcao("recheio", ovoUnico.recheio));
+            if (item.tipoOvo === "colher" && ovoUnico.cobertura) {
+              addLine("Topper/Cobertura", getNomeOpcao("cobertura", ovoUnico.cobertura));
+            }
+          }
+        }
       }
 
-      if (item.tipoOvo === "colher") {
-        addLine("Topper/Cobertura", getNomeOpcao("cobertura", item.cobertura));
-      }
-
-      // Subtotal do item
       msg += `Subtotal: R$ ${item.precoTotal.toFixed(2).replace(".", ",")}\n\n`;
     });
 
-    // Fechamento
     msg += `----------------------------------\n`;
     msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinho.toFixed(2).replace(".", ",")}*\n\n`;
     msg += `Aguardando confirmação e dados para pagamento!`;
@@ -173,25 +177,61 @@ export default function Checkout() {
                           {getNomeOpcao("tipoCasca", item.tipoCasca)}
                         </span>
                       </div>
-                      {item.tipoOvo !== "tradicional" && (
-                        <div className="flex justify-between border-b border-rose-50 pb-2">
-                          <span className="font-sans opacity-70">Recheio:</span>
-                          <span className="text-[#5A2C1D] font-bold">
-                            {getNomeOpcao("recheio", item.recheio)}
-                          </span>
-                        </div>
-                      )}
-                      {item.tipoOvo === "colher" && (
-                        <div className="flex justify-between border-b border-rose-50 pb-2">
-                          <span className="font-sans opacity-70">
-                            Cobertura:
-                          </span>
-                          <span className="text-[#5A2C1D] font-bold">
-                            {getNomeOpcao("cobertura", item.cobertura)}
-                          </span>
-                        </div>
-                      )}
                     </div>
+
+                    {/* Ovos do kit — exibição individual */}
+                    {item.tipoOvo !== "tradicional" && item.ovos && (
+                      <div className="mt-4">
+                        {item.ovos.length > 1 ? (
+                          <>
+                            <p className="text-[10px] uppercase tracking-widest font-black text-[#E5989B] mb-2">
+                              Composição do Kit
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {item.ovos.map((ovo, i) => {
+                                const nomeRecheio = recheios.find((r) => r.id === ovo.recheio)?.nome || "—";
+                                const nomeCobertura = ovo.cobertura
+                                  ? coberturas.find((c) => c.id === ovo.cobertura)?.nome
+                                  : null;
+                                return (
+                                  <div
+                                    key={i}
+                                    className="flex items-start gap-2 bg-rose-50/60 rounded-xl px-3 py-2 ring-1 ring-rose-100"
+                                  >
+                                    <span className="w-5 h-5 bg-[#E5989B] text-white rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
+                                      {i + 1}
+                                    </span>
+                                    <div className="text-xs">
+                                      <span className="font-bold text-[#5A2C1D]">{nomeRecheio}</span>
+                                      {nomeCobertura && (
+                                        <span className="text-[#8C7A70]"> + {nomeCobertura}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 text-sm text-[#8C7A70]">
+                            <div className="flex justify-between border-b border-rose-50 pb-2">
+                              <span className="font-sans opacity-70">Recheio:</span>
+                              <span className="text-[#5A2C1D] font-bold">
+                                {getNomeOpcao("recheio", item.ovos[0]?.recheio)}
+                              </span>
+                            </div>
+                            {item.tipoOvo === "colher" && item.ovos[0]?.cobertura && (
+                              <div className="flex justify-between border-b border-rose-50 pb-2">
+                                <span className="font-sans opacity-70">Cobertura:</span>
+                                <span className="text-[#5A2C1D] font-bold">
+                                  {getNomeOpcao("cobertura", item.ovos[0]?.cobertura)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between md:flex-col md:items-end gap-6 min-w-[140px]">

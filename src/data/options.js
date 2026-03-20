@@ -211,59 +211,58 @@ export const tabelaRecheios = {
 // --- FUNÇÃO CENTRAL DE PRECIFICAÇÃO ---
 // --- FUNÇÃO CENTRAL DE PRECIFICAÇÃO ATUALIZADA ---
 export const calcularPrecoTotal = (pedido) => {
-  let totalPorOvo = 0;
   const tam = tamanhos.find((t) => t.id === pedido.tamanho);
   if (!tam) return 0;
 
-  // 1. Preço Base (Casca)
-  totalPorOvo += tam.baseLisa;
-  if (pedido.tipoCasca === "crocante") {
-    totalPorOvo += tam.adcCrocante;
-  }
+  // Preço base por ovo (casca, sem recheio/cobertura)
+  const calcularBasePorOvo = (tipoCascaId) => {
+    let base = tam.baseLisa;
+    if (tipoCascaId === "crocante") base += tam.adcCrocante;
+    return base;
+  };
 
-  // 2. Adicionais de Recheio
-  if (pedido.tipoOvo !== "tradicional") {
-    const rech = recheios.find((r) => r.id === pedido.recheio);
-    if (rech) {
-      const valRecheio =
-        tabelaRecheios[rech.categoria][pedido.tamanho][pedido.tipoOvo];
-      if (valRecheio) totalPorOvo += valRecheio;
-    }
-  }
+  // Preço adicional do recheio de um ovo específico
+  const calcularRecheioOvo = (recheioId) => {
+    if (pedido.tipoOvo === "tradicional" || !recheioId) return 0;
+    const rech = recheios.find((r) => r.id === recheioId);
+    if (!rech) return 0;
+    return tabelaRecheios[rech.categoria]?.[pedido.tamanho]?.[pedido.tipoOvo] || 0;
+  };
 
-  // 3. Coberturas (Apenas Colher) com cálculo dinâmico pelo tamanho
-  if (pedido.tipoOvo === "colher" && pedido.cobertura) {
-    const cob = coberturas.find((c) => c.id === pedido.cobertura);
-    if (cob && cob.precos && cob.precos[pedido.tamanho]) {
-      totalPorOvo += cob.precos[pedido.tamanho];
-    }
-  }
+  // Preço adicional da cobertura de um ovo específico
+  const calcularCoberturaOvo = (coberturaId) => {
+    if (pedido.tipoOvo !== "colher" || !coberturaId) return 0;
+    const cob = coberturas.find((c) => c.id === coberturaId);
+    return cob?.precos?.[pedido.tamanho] || 0;
+  };
 
-  // 4. Multiplicador de Kit e Aplicação de Desconto
-  let multiplicador = 1;
+  // Desconto por kit
   let desconto = 0;
-
-  if (pedido.tipoOvo !== "tradicional" && pedido.kit) {
-    const k = kits.find((x) => x.id === pedido.kit);
-    if (k) {
-      multiplicador = k.mult;
-
-      // Aplica a regra de desconto baseada no tipo de kit
-      if (k.id === "dupla") {
-        desconto = 3.0;
-      } else if (k.id === "trio") {
-        desconto = 5.0;
-      } else if (k.id === "quarteto") {
-        desconto = 10.0;
-      }
-    }
+  const k = kits.find((x) => x.id === pedido.kit);
+  if (k && pedido.tipoOvo !== "tradicional") {
+    if (k.id === "dupla") desconto = 3.0;
+    else if (k.id === "trio") desconto = 5.0;
+    else if (k.id === "quarteto") desconto = 10.0;
   }
 
-  // O Total Final é: (Valor de 1 ovo * quantidade no kit) - Desconto do combo
-  let totalFinal = totalPorOvo * multiplicador - desconto;
+  // Se usa novo formato com array de ovos individuais
+  if (pedido.ovos && pedido.ovos.length > 0) {
+    const totalOvos = pedido.ovos.reduce((acc, ovo) => {
+      const base = calcularBasePorOvo(ovo.tipoCasca || pedido.tipoCasca);
+      const recheio = calcularRecheioOvo(ovo.recheio);
+      const cobertura = calcularCoberturaOvo(ovo.cobertura);
+      return acc + base + recheio + cobertura;
+    }, 0);
+    return Math.max(0, totalOvos - desconto);
+  }
 
-  // Garante que o valor nunca seja negativo (por segurança)
-  return Math.max(0, totalFinal);
+  // Fallback: formato legado (campo plano)
+  const totalPorOvo =
+    calcularBasePorOvo(pedido.tipoCasca) +
+    calcularRecheioOvo(pedido.recheio) +
+    calcularCoberturaOvo(pedido.cobertura);
+  const multiplicador = k ? k.mult : 1;
+  return Math.max(0, totalPorOvo * multiplicador - desconto);
 };
 
 export const getNomeOpcao = (categoria, id) => {
