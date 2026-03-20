@@ -43,7 +43,17 @@ export default function Summary({ pedido }) {
 
   function handleAddToCart() {
     if (!pedidoCompleto) return;
-    addToCart(pedido, precoTotal);
+    
+    // CORREÇÃO PARA O CARRINHO: 
+    // Copiamos os dados da casca do primeiro ovo para a raiz do pedido,
+    // garantindo que a tela de Checkout consiga ler as informações corretamente.
+    const pedidoParaCarrinho = {
+      ...pedido,
+      saborCasca: pedido.ovos[0]?.saborCasca,
+      tipoCasca: pedido.ovos[0]?.tipoCasca,
+    };
+
+    addToCart(pedidoParaCarrinho, precoTotal);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
@@ -134,17 +144,25 @@ export default function Summary({ pedido }) {
                 : []),
               ...(!isKitMulti ? [{ key: "saborCasca", label: "Sabor da Casca" }] : []),
               ...(!isKitMulti ? [{ key: "tipoCasca", label: "Textura" }] : []),
-            ].map(({ key, label }) => (
-              <div
-                key={key}
-                className="flex justify-between py-2 border-b border-rose-100/50 last:border-0 hover:bg-white/40 transition-colors rounded-lg px-2"
-              >
-                <span className="opacity-80 text-xs md:text-sm">{label}</span>
-                <span className="font-semibold text-[#5A2C1D] text-right text-xs md:text-sm">
-                  {getNomeOpcao(key, pedido[key])}
-                </span>
-              </div>
-            ))}
+            ].map(({ key, label }) => {
+              
+              // CORREÇÃO VISUAL: Se a chave for sabor ou textura, busca dentro do ovo!
+              const valorOpcao = (key === "saborCasca" || key === "tipoCasca") 
+                ? pedido.ovos[0]?.[key] 
+                : pedido[key];
+
+              return (
+                <div
+                  key={key}
+                  className="flex justify-between py-2 border-b border-rose-100/50 last:border-0 hover:bg-white/40 transition-colors rounded-lg px-2"
+                >
+                  <span className="opacity-80 text-xs md:text-sm">{label}</span>
+                  <span className="font-semibold text-[#5A2C1D] text-right text-xs md:text-sm">
+                    {getNomeOpcao(key, valorOpcao)}
+                  </span>
+                </div>
+              );
+            })}
 
             {/* Ovos individuais (kit multi) */}
             {isKitMulti && (
