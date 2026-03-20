@@ -16,16 +16,26 @@ export default function Summary({ pedido }) {
   const isKitMulti = pedido.ovos && pedido.ovos.length > 1;
 
   // Verifica se todos os ovos estão completamente configurados
-  const pedidoCompleto = pedido.tipoOvo === "tradicional" ||
-    (pedido.ovos && pedido.ovos.every((ovo) => {
-      if (!ovo.recheio) return false;
-      if (pedido.tipoOvo === "colher" && !ovo.cobertura) return false;
-      return true;
-    }));
+  const pedidoCompleto = pedido.ovos && pedido.ovos.every((ovo) => {
+    // 1. Todo ovo precisa obrigatoriamente de Sabor e Textura da casca
+    if (!ovo.saborCasca || !ovo.tipoCasca) return false;
+    
+    // 2. Se for tradicional, basta a casca (já verificada acima)
+    if (pedido.tipoOvo === "tradicional") return true;
+    
+    // 3. Se for de colher ou trufado, o recheio é obrigatório
+    if (!ovo.recheio) return false;
+    
+    // 4. Se for especificamente de colher, o topper (cobertura) é obrigatório
+    if (pedido.tipoOvo === "colher" && !ovo.cobertura) return false;
+    
+    return true;
+  });
 
   const ovosIncompletos = pedido.ovos
     ? pedido.ovos.filter((ovo) => {
-        if (!ovo.recheio) return true;
+        if (!ovo.saborCasca || !ovo.tipoCasca) return true;
+        if (pedido.tipoOvo !== "tradicional" && !ovo.recheio) return true;
         if (pedido.tipoOvo === "colher" && !ovo.cobertura) return true;
         return false;
       }).length
