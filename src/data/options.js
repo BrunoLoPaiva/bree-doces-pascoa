@@ -75,7 +75,7 @@ export const recheios = [
     categoria: "tradicional",
     cor: "#3b1f14",
     preco: 0,
-    img: "brigadeiro.avif",
+    img: "brigadeiro.jpg",
   },
   {
     id: "beijinho",
@@ -107,7 +107,7 @@ export const recheios = [
     categoria: "tradicional",
     cor: "#c29b6e",
     preco: 0,
-    img: "pacoca-recheio.jpg",
+    img: "amendoim.jpg",
   },
 ];
 
@@ -134,7 +134,7 @@ export const coberturas = [
   {
     id: "kinder",
     nome: "Kinder Bueno",
-    precos: { 50: 1.5, 150: 3.5, 250: 5.5, 350: 8.0, 500: 10.0 },
+    precos: { 50: 2.5, 150: 4.5, 250: 6.5, 350: 9.0, 500: 11.0 },
     img: "https://funchal.vtexassets.com/arquivos/ids/248156/foto_1_002.jpg?v=638461251121300000",
   },
   {
@@ -152,7 +152,7 @@ export const coberturas = [
   {
     id: "ovomaltine",
     nome: "Ovomaltine Rocks",
-    precos: { 50: 1.0, 150: 2.0, 250: 3.0, 350: 4.0, 500: 5.0 },
+    precos: { 50: 2.0, 150: 3.0, 250: 4.0, 350: 5.0, 500: 6.0 },
     img: "https://cdn.dooca.store/259/products/yjxtg0fth3no3zstkjvg1ut0nif4malmvkoq_640x640+fill_ffffff.jpg?v=1582745557&webp=0",
   },
   {

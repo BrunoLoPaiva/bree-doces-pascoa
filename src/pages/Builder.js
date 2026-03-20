@@ -41,7 +41,7 @@ export default function Builder() {
       if (categoria === "tamanho") {
         const invalidKits = {
           150: ["quarteto"],
-          250: ["dupla", "quarteto"],
+          250: ["quarteto"],
           350: ["dupla", "trio", "quarteto"],
           500: ["dupla", "trio", "quarteto"],
         }[id] || [];

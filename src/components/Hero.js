@@ -166,7 +166,7 @@ export default function Hero({ start }) {
           <motion.img
             variants={itemVariants}
             src="logo.png"
-            className="w-32 sm:w-40 lg:w-56 mb-4 drop-shadow-sm"
+            className="w-32 sm:w-40 lg:w-56 mb-6 drop-shadow-sm"
           />
 
           {/* Título */}
