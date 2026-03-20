@@ -15,28 +15,8 @@ import {
   tabelaRecheios,
 } from "../data/options";
 
-// Mapeamento sequencial: recheio -> cobertura sugerida
-const coberturaSequencial = {
-  brigadeiro: "kinder",
-  beijinho: "morango",
-  pacoca: "amendoin",
-  dois_amores: "confete",
-  ninho_nutella: "nutella",
-  maracuja: "ovomaltine",
-  sensacao: "oreo",
-};
-
 function criarOvoInicial() {
   return { saborCasca: null, tipoCasca: null, recheio: null, cobertura: null };
-}
-
-function sincronizarOvos(ovosAtuais, novoMult) {
-  const novosOvos = [];
-  for (let i = 0; i < novoMult; i++) {
-    // Preserva ovo já configurado, mas não auto-preenche novos
-    novosOvos.push(ovosAtuais[i] || criarOvoInicial());
-  }
-  return novosOvos;
 }
 
 // Retorna se um ovo está completamente configurado
