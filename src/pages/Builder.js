@@ -1,5 +1,5 @@
 // src/pages/Builder.js
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import OptionCard from "../components/OptionCard";
 import Summary from "../components/Summary";
@@ -39,39 +39,61 @@ export default function Builder() {
     ovos: [criarOvoInicial()],
   });
 
+  const kitSectionRef = useRef(null);
+
+  // Scroll suave até o topo da seção do kit
+  const scrollToKitSection = useCallback(() => {
+    setTimeout(() => {
+      kitSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 350);
+  }, []);
+
   function select(categoria, id) {
     setPedido((prev) => {
       const next = { ...prev, [categoria]: id };
 
-      // Ajuste de tipoOvo ao mudar tamanho
-      if (categoria === "tamanho" && id === "50" && next.tipoOvo === "trufado") {
-        next.tipoOvo = "colher";
-      }
-
-      // Resetar kit inválido ao mudar tamanho
+      // ==========================================
+      // MUDANÇA DE TAMANHO
+      // ==========================================
       if (categoria === "tamanho") {
+        // Trufado indisponível para 50g → volta pra colher
+        if (id === "50" && next.tipoOvo === "trufado") {
+          next.tipoOvo = "colher";
+        }
+
+        // Kits inválidos para o novo tamanho
         const invalidKits = {
           150: ["quarteto"],
           250: ["quarteto"],
           350: ["dupla", "trio", "quarteto"],
           500: ["dupla", "trio", "quarteto"],
         }[id] || [];
+
         if (invalidKits.includes(next.kit)) {
           next.kit = "unidade";
+          next.ovos = [criarOvoInicial()];
+          next.ovoAtivo = 0;
         }
       }
 
-      // Ao mudar kit, resetar todos os ovos para o estado inicial
+      // ==========================================
+      // MUDANÇA DE ESTILO DO OVO
+      // ==========================================
+      if (categoria === "tipoOvo") {
+        // Tradicional não suporta kits → resetar tudo
+        // Qualquer mudança de tipo → limpar ovos e kit
+        next.kit = "unidade";
+        next.ovos = [criarOvoInicial()];
+        next.ovoAtivo = 0;
+      }
+
+      // ==========================================
+      // MUDANÇA DE KIT
+      // ==========================================
       if (categoria === "kit") {
         const k = kits.find((x) => x.id === id);
         const mult = k ? k.mult : 1;
         next.ovos = Array.from({ length: mult }, () => criarOvoInicial());
-        next.ovoAtivo = 0;
-      }
-
-      // Ao mudar tipo do ovo, resetar recheio e cobertura de todos
-      if (categoria === "tipoOvo") {
-        next.ovos = prev.ovos.map(() => criarOvoInicial());
         next.ovoAtivo = 0;
       }
 
@@ -87,15 +109,15 @@ export default function Builder() {
         return novoOvo;
       });
 
-      // Ovo resultante após a seleção
       const ovoResultante = novosOvos[prev.ovoAtivo];
       const isKitMultiLocal = prev.ovos.length > 1;
 
-      // Avança para o próximo ovo SOMENTE quando o ovo atual estiver completo
       let proximoOvoAtivo = prev.ovoAtivo;
       if (isKitMultiLocal && prev.ovoAtivo < prev.ovos.length - 1) {
         if (ovoCompleto(ovoResultante, prev.tipoOvo)) {
           proximoOvoAtivo = prev.ovoAtivo + 1;
+          // Scroll suave até o topo da seção kit
+          scrollToKitSection();
         }
       }
 
@@ -352,13 +374,16 @@ export default function Builder() {
 
         {/* RECHEIO + TOPPER UNIFICADO */}
         <AnimatePresence>
-          {showOvos ? (
+          {showOvos && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="mt-16 md:mt-20"
             >
+              {/* Âncora de scroll para kit */}
+              <div ref={kitSectionRef} className="scroll-mt-4" />
+
               <h2 className="text-2xl md:text-3xl font-bold mb-2">
                 {stepOvos}. {isKitMulti ? "Monte cada Ovo" : "Recheio e Topper"}
               </h2>
@@ -370,52 +395,69 @@ export default function Builder() {
                   : "Escolha o recheio do seu ovo"}
               </p>
 
-              {/* ABAS DE OVO (kit multi) */}
+              {/* ====== STICKY PROGRESS BAR (kit multi) ====== */}
               {isKitMulti && (
-                <div className="flex flex-wrap gap-2 md:gap-3 mb-6">
-                  {pedido.ovos.map((ovo, idx) => {
-                    const isAtivo = idx === pedido.ovoAtivo;
-                    const concluido = ovoCompleto(ovo, pedido.tipoOvo);
-                    const desbloqueado = pedido.ovos
-                      .slice(0, idx)
-                      .every((o) => ovoCompleto(o, pedido.tipoOvo));
-                    const clicavel = isAtivo || concluido || desbloqueado;
-                    return (
-                      <button
-                        key={idx}
-                        disabled={!clicavel}
-                        onClick={() =>
-                          clicavel &&
-                          setPedido((prev) => ({ ...prev, ovoAtivo: idx }))
-                        }
-                        className={`
-                          relative flex items-center gap-2 px-4 py-2.5 rounded-2xl font-semibold
-                          text-sm transition-all duration-200 focus:outline-none
-                          ${
-                            isAtivo
-                              ? "bg-[#E5989B] text-white shadow-md scale-[1.03]"
-                              : concluido
-                              ? "bg-rose-50 text-[#E5989B] ring-1 ring-[#E5989B]/40 hover:bg-rose-100 cursor-pointer active:scale-95"
-                              : "opacity-40 bg-white text-[#8C7A70] ring-1 ring-rose-100 cursor-not-allowed"
+                <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 md:-mx-10 lg:-mx-12 px-4 sm:px-6 md:px-10 lg:px-12 py-3 mb-6 bg-white/90 backdrop-blur-md border-b border-rose-100/60 shadow-sm">
+                  {/* Título + contador */}
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-sm font-bold text-[#5A2C1D]">
+                      Montando Ovo {pedido.ovoAtivo + 1} de {pedido.ovos.length}
+                    </span>
+                    <span className="text-[10px] text-[#8C7A70] uppercase tracking-wider font-bold">
+                      {pedido.ovos.filter((o) => ovoCompleto(o, pedido.tipoOvo)).length}/{pedido.ovos.length} prontos
+                    </span>
+                  </div>
+
+                  {/* Pílulas de progresso */}
+                  <div className="flex gap-1.5">
+                    {pedido.ovos.map((ovo, idx) => {
+                      const isAtivo = idx === pedido.ovoAtivo;
+                      const concluido = ovoCompleto(ovo, pedido.tipoOvo);
+                      const desbloqueado = pedido.ovos
+                        .slice(0, idx)
+                        .every((o) => ovoCompleto(o, pedido.tipoOvo));
+                      const clicavel = isAtivo || concluido || desbloqueado;
+
+                      return (
+                        <button
+                          key={idx}
+                          disabled={!clicavel}
+                          onClick={() =>
+                            clicavel &&
+                            setPedido((prev) => ({ ...prev, ovoAtivo: idx }))
                           }
-                        `}
-                      >
-                        <span className={`
-                          w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black
-                          ${isAtivo ? "bg-white/30 text-white" : concluido ? "bg-[#E5989B] text-white" : "bg-rose-100 text-[#8C7A70]"}
-                        `}>
-                          {concluido && !isAtivo ? "✓" : !clicavel ? "🔒" : idx + 1}
-                        </span>
-                        <span>Ovo {idx + 1}</span>
-                        {concluido && !isAtivo && (
-                          <span className="hidden sm:inline text-[10px] opacity-70 font-normal">
-                             {getNomeOpcao("saborCasca", ovo.saborCasca).split(" ")[0]}
-                             {ovo.recheio && <> • {getNomeOpcao("recheio", ovo.recheio).split(" ")[0]}</>}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                          className={`
+                            flex-1 flex items-center justify-center gap-1.5
+                            py-2 rounded-xl font-semibold text-xs
+                            transition-all duration-200 focus:outline-none
+                            ${
+                              isAtivo
+                                ? "bg-[#E5989B] text-white shadow-md ring-2 ring-[#E5989B]/30"
+                                : concluido
+                                ? "bg-rose-50 text-[#E5989B] ring-1 ring-[#E5989B]/30 hover:bg-rose-100 cursor-pointer"
+                                : "bg-gray-50 text-[#8C7A70]/40 cursor-not-allowed"
+                            }
+                          `}
+                        >
+                          {concluido && !isAtivo ? (
+                            <span className="text-[10px]">✓</span>
+                          ) : !clicavel ? (
+                            <span className="text-[10px]">🔒</span>
+                          ) : (
+                            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                              isAtivo ? "bg-white/30" : "bg-rose-100"
+                            }`}>{idx + 1}</span>
+                          )}
+                          <span className="hidden sm:inline">Ovo {idx + 1}</span>
+                          {concluido && !isAtivo && (
+                            <span className="hidden md:inline text-[9px] opacity-60 font-normal truncate max-w-[60px]">
+                              {getNomeOpcao("saborCasca", ovo.saborCasca).split(" ")[0]}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -538,20 +580,28 @@ export default function Builder() {
                       </div>
                     </div>
                   )}
-                  {/* === MENSAGEM TRADICIONAL === */}
-                  {pedido.tipoOvo === "tradicional" && (
-                    <div className="mt-10 p-5 md:p-6 bg-rose-50 rounded-2xl border border-rose-100 text-[#8C7A70] text-sm md:text-base mb-10">
-                      ✨ Ovos Tradicionais acompanham mini trufas de brigadeiro.
-                    </div>
-                  )}
                 </motion.div>
               </AnimatePresence>
             </motion.div>
-          ) : (
+          )}
+          
+          {/* === MENSAGEM TRADICIONAL === */}
+          {pedido.tipoOvo === "tradicional" && (ovoAtual.saborCasca && ovoAtual.tipoCasca) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-10 p-5 md:p-6 bg-rose-50 rounded-2xl border border-rose-100 text-[#8C7A70] text-sm md:text-base"
+              className="mt-10 p-5 md:p-6 bg-rose-50 rounded-2xl border border-rose-100 text-[#8C7A70] text-sm md:text-base mb-10"
+            >
+              ✨ Ovos Tradicionais acompanham mini trufas de brigadeiro.
+            </motion.div>
+          )}
+
+          {/* === CALL TO ACTION INICIAL === */}
+          {!isKitMulti && (!ovoAtual.saborCasca || !ovoAtual.tipoCasca) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-10 p-5 md:p-6 bg-rose-50 rounded-2xl border border-rose-100 text-[#8C7A70] text-sm md:text-base mb-10"
             >
               ✨ Escolha o sabor e a textura acima para começar.
             </motion.div>

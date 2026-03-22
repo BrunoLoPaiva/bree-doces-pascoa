@@ -1,34 +1,34 @@
 // src/components/Summary.js
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, ChevronUp, ArrowRight } from "lucide-react";
+import { CheckCircle2, Circle, ChevronUp, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { getNomeOpcao, calcularPrecoTotal, recheios, coberturas, saboresCasca, tiposCasca } from "../data/options";
+import { getNomeOpcao, calcularPrecoTotal } from "../data/options";
 
 export default function Summary({ pedido }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [added, setAdded] = useState(false);
   const { cart, addToCart } = useCart();
   const navigate = useNavigate();
+  const addedTimerRef = useRef(null);
+
+  // Cleanup do timeout ao desmontar
+  useEffect(() => {
+    return () => {
+      if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
+    };
+  }, []);
 
   const precoTotal = calcularPrecoTotal(pedido);
   const isKitMulti = pedido.ovos && pedido.ovos.length > 1;
 
   // Verifica se todos os ovos estão completamente configurados
   const pedidoCompleto = pedido.ovos && pedido.ovos.every((ovo) => {
-    // 1. Todo ovo precisa obrigatoriamente de Sabor e Textura da casca
     if (!ovo.saborCasca || !ovo.tipoCasca) return false;
-    
-    // 2. Se for tradicional, basta a casca (já verificada acima)
     if (pedido.tipoOvo === "tradicional") return true;
-    
-    // 3. Se for de colher ou trufado, o recheio é obrigatório
     if (!ovo.recheio) return false;
-    
-    // 4. Se for especificamente de colher, o topper (cobertura) é obrigatório
     if (pedido.tipoOvo === "colher" && !ovo.cobertura) return false;
-    
     return true;
   });
 
@@ -42,11 +42,9 @@ export default function Summary({ pedido }) {
     : 0;
 
   function handleAddToCart() {
-    if (!pedidoCompleto) return;
-    
-    // CORREÇÃO PARA O CARRINHO: 
-    // Copiamos os dados da casca do primeiro ovo para a raiz do pedido,
-    // garantindo que a tela de Checkout consiga ler as informações corretamente.
+    // Prevenir duplo clique
+    if (!pedidoCompleto || added) return;
+
     const pedidoParaCarrinho = {
       ...pedido,
       saborCasca: pedido.ovos[0]?.saborCasca,
@@ -55,7 +53,9 @@ export default function Summary({ pedido }) {
 
     addToCart(pedidoParaCarrinho, precoTotal);
     setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+
+    // Guarda ref do timer para poder cancelar no cleanup
+    addedTimerRef.current = setTimeout(() => setAdded(false), 2000);
   }
 
   return (
@@ -100,16 +100,46 @@ export default function Summary({ pedido }) {
         >
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="text-[#E5989B] w-5 h-5" />
+              {pedidoCompleto
+                ? <CheckCircle2 className="text-[#E5989B] w-5 h-5" />
+                : <Circle className="text-[#8C7A70]/40 w-5 h-5" />
+              }
               <h3 className="font-bold text-lg md:text-xl text-[#5A2C1D] leading-none mt-1">
-                Seu Pedido
+                {isKitMulti && !pedidoCompleto
+                  ? `Ovo ${pedido.ovoAtivo + 1} de ${pedido.ovos.length}`
+                  : "Seu Pedido"
+                }
               </h3>
             </div>
 
+            {/* Kit progress bar + price */}
             {!isExpanded && (
-              <span className="text-[#8C7A70] text-sm mt-1 lg:hidden">
-                R$ {precoTotal.toFixed(2).replace(".", ",")}
-              </span>
+              <div className="flex items-center gap-2 mt-1.5 lg:hidden">
+                {isKitMulti && !pedidoCompleto && (
+                  <div className="flex gap-0.5">
+                    {pedido.ovos.map((ovo, idx) => {
+                      const done = ovo.saborCasca && ovo.tipoCasca &&
+                        (pedido.tipoOvo === "tradicional" || ovo.recheio) &&
+                        (pedido.tipoOvo !== "colher" || ovo.cobertura);
+                      return (
+                        <div
+                          key={idx}
+                          className={`w-5 h-1.5 rounded-full transition-colors ${
+                            done
+                              ? "bg-[#E5989B]"
+                              : idx === pedido.ovoAtivo
+                              ? "bg-[#E5989B]/40 animate-pulse"
+                              : "bg-rose-100"
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+                <span className="text-[#8C7A70] text-sm">
+                  R$ {precoTotal.toFixed(2).replace(".", ",")}
+                </span>
+              </div>
             )}
           </div>
 
@@ -145,10 +175,8 @@ export default function Summary({ pedido }) {
               ...(!isKitMulti ? [{ key: "saborCasca", label: "Sabor da Casca" }] : []),
               ...(!isKitMulti ? [{ key: "tipoCasca", label: "Textura" }] : []),
             ].map(({ key, label }) => {
-              
-              // CORREÇÃO VISUAL: Se a chave for sabor ou textura, busca dentro do ovo!
-              const valorOpcao = (key === "saborCasca" || key === "tipoCasca") 
-                ? pedido.ovos[0]?.[key] 
+              const valorOpcao = (key === "saborCasca" || key === "tipoCasca")
+                ? pedido.ovos[0]?.[key]
                 : pedido[key];
 
               return (
@@ -192,7 +220,7 @@ export default function Summary({ pedido }) {
                         </div>
                       </div>
                       
-                      {pedido.tipoOvo !== "tradicional" && (
+                      {pedido.tipoOvo !== "tradicional" && ovo.recheio && (
                         <div className="mt-1 text-right text-xs md:text-sm">
                           <span className="text-[#8C7A70]">{nomeRecheio}</span>
                           {nomeCobertura && (
@@ -209,12 +237,14 @@ export default function Summary({ pedido }) {
             {/* Ovo único (sem kit multi) */}
             {!isKitMulti && pedido.tipoOvo !== "tradicional" && pedido.ovos?.[0] && (
               <>
-                <div className="flex justify-between py-2 border-b border-rose-100/50 last:border-0 hover:bg-white/40 transition-colors rounded-lg px-2">
-                  <span className="opacity-80 text-xs md:text-sm">Recheio</span>
-                  <span className="font-semibold text-[#5A2C1D] text-right text-xs md:text-sm">
-                    {getNomeOpcao("recheio", pedido.ovos[0].recheio)}
-                  </span>
-                </div>
+                {pedido.ovos[0].recheio && (
+                  <div className="flex justify-between py-2 border-b border-rose-100/50 last:border-0 hover:bg-white/40 transition-colors rounded-lg px-2">
+                    <span className="opacity-80 text-xs md:text-sm">Recheio</span>
+                    <span className="font-semibold text-[#5A2C1D] text-right text-xs md:text-sm">
+                      {getNomeOpcao("recheio", pedido.ovos[0].recheio)}
+                    </span>
+                  </div>
+                )}
                 {pedido.tipoOvo === "colher" && pedido.ovos[0].cobertura && (
                   <div className="flex justify-between py-2 border-b border-rose-100/50 last:border-0 hover:bg-white/40 transition-colors rounded-lg px-2">
                     <span className="opacity-80 text-xs md:text-sm">Cobertura</span>
@@ -252,10 +282,10 @@ export default function Summary({ pedido }) {
                   }
                 : { scale: 1 }
             }
-            whileHover={pedidoCompleto ? { scale: 1.02 } : {}}
-            whileTap={pedidoCompleto ? { scale: 0.97 } : {}}
+            whileHover={pedidoCompleto && !added ? { scale: 1.02 } : {}}
+            whileTap={pedidoCompleto && !added ? { scale: 0.97 } : {}}
             onClick={handleAddToCart}
-            disabled={!pedidoCompleto}
+            disabled={!pedidoCompleto || added}
             className={`
               w-full flex items-center justify-center gap-2 
               py-3 px-4 rounded-full font-bold 
@@ -265,7 +295,7 @@ export default function Summary({ pedido }) {
                 !pedidoCompleto
                   ? "bg-rose-100 text-[#E5989B]/60 cursor-not-allowed shadow-none"
                   : added
-                  ? "bg-[#25D366] text-white shadow-green-200/50"
+                  ? "bg-[#25D366] text-white shadow-green-200/50 cursor-not-allowed"
                   : "bg-[#E5989B] text-white shadow-rose-200/50 hover:bg-[#d88689]"
               }
             `}
@@ -276,7 +306,11 @@ export default function Summary({ pedido }) {
                 Na cesta de ovos!
               </>
             ) : !pedidoCompleto ? (
-              <>⚠️ Monte todos os ovos ({ovosIncompletos} faltando)</>
+              isKitMulti ? (
+                <>⚠️ Monte todos os ovos ({ovosIncompletos} faltando)</>
+              ) : (
+                <>⚠️ Preencha as opções restantes</>
+              )
             ) : (
               <>Adicionar à cesta de ovos!</>
             )}

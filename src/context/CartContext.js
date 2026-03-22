@@ -1,15 +1,28 @@
+// src/context/CartContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
+const CART_KEY = 'bree_pascoa_cart';
+const EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 horas
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('bree_pascoa_cart');
-    return savedCart ? JSON.parse(savedCart) : [];
+    try {
+      const savedData = localStorage.getItem(CART_KEY);
+      if (!savedData) return [];
+      const { items, timestamp } = JSON.parse(savedData);
+      if (!timestamp || Date.now() - timestamp > EXPIRATION_MS) {
+        localStorage.removeItem(CART_KEY);
+        return [];
+      }
+      return items || [];
+    } catch {
+      return [];
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem('bree_pascoa_cart', JSON.stringify(cart));
+    localStorage.setItem(CART_KEY, JSON.stringify({ items: cart, timestamp: Date.now() }));
   }, [cart]);
 
   const addToCart = (pedido, precoTotal) => {

@@ -1,20 +1,29 @@
 // src/pages/Checkout.js
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../context/CartContext";
-import { getNomeOpcao, recheios, coberturas } from "../data/options";
+import { getNomeOpcao, calcularPrecoTotal } from "../data/options";
 import {
   Trash2,
   ShoppingCart,
   MessageCircle,
   ArrowLeft,
   Plus,
+  AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
-  const { cart, removeFromCart, totalCarrinho } = useCart();
+  const { cart, removeFromCart, clearCart } = useCart();
   const navigate = useNavigate();
   const whatsapp = "5514996917274";
+  const [confirming, setConfirming] = useState(false);
+
+  // Recalcular preços dinâmicamente ao finalizar (ignora preço guardado)
+  const totalCarrinhoAtual = cart.reduce(
+    (acc, item) => acc + calcularPrecoTotal(item),
+    0
+  );
 
   function finalizarPedido() {
     let msg =
@@ -31,13 +40,12 @@ export default function Checkout() {
 
       const isKitMulti = item.ovos && item.ovos.length > 1;
 
-      // Casca (Mostrar no topo apenas se NÃO for kit multi)
+      // Casca (apenas para ovo único)
       if (!isKitMulti) {
         addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
         addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
       }
 
-      // Kit e ovos individuais
       if (isKitMulti) {
         addLine("Formato", getNomeOpcao("kit", item.kit));
         msg += `*Composição:*\n`;
@@ -48,7 +56,7 @@ export default function Checkout() {
           const nomeCobertura = ovo.cobertura
             ? ` + ${getNomeOpcao("cobertura", ovo.cobertura)}`
             : "";
-          
+
           if (item.tipoOvo === "tradicional") {
             msg += `  Ovo ${i + 1}: ${nomeSabor} (${nomeTextura})\n`;
           } else {
@@ -56,15 +64,9 @@ export default function Checkout() {
           }
         });
       } else {
-        // Ovo único
         if (item.kit && item.kit !== "unidade") {
           addLine("Formato", getNomeOpcao("kit", item.kit));
         }
-        
-        // Casca (já adicionada acima globalmente para o item, 
-        // mas vamos garantir que apareça aqui se não aparecer em cima)
-        // addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
-        // addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
 
         const ovoUnico = item.ovos?.[0];
         if (ovoUnico && item.tipoOvo !== "tradicional") {
@@ -75,15 +77,22 @@ export default function Checkout() {
         }
       }
 
-      msg += `Subtotal: R$ ${item.precoTotal.toFixed(2).replace(".", ",")}\n\n`;
+      // Usar preço recalculado dinamicamente
+      const precoAtual = calcularPrecoTotal(item);
+      msg += `Subtotal: R$ ${precoAtual.toFixed(2).replace(".", ",")}\n\n`;
     });
 
     msg += `----------------------------------\n`;
-    msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinho.toFixed(2).replace(".", ",")}*\n\n`;
+    msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinhoAtual.toFixed(2).replace(".", ",")}*\n\n`;
     msg += `Aguardando confirmação e dados para pagamento!`;
 
-    window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`);
+    // Limpar o carrinho antes de redirecionar para evitar pedidos duplicados pós-fechar o site
+    clearCart();
+
+    // Usar location.href para evitar bloqueio de popup blocker
+    window.location.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
   }
+
   if (cart.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-[#5A2C1D] p-6 relative overflow-hidden">
@@ -122,6 +131,56 @@ export default function Checkout() {
       </div>
 
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(244,194,194,0.1),transparent_50%)] pointer-events-none" />
+
+      {/* MODAL DE CONFIRMAÇÃO */}
+      <AnimatePresence>
+        {confirming && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl text-center"
+            >
+              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-[#E5989B]" />
+              </div>
+              <h2 className="text-xl font-bold text-[#5A2C1D] mb-2">
+                Confirmar Pedido?
+              </h2>
+              <p className="text-[#8C7A70] text-sm mb-2 leading-relaxed">
+                Você será redirecionado ao WhatsApp para confirmar seu pedido.
+              </p>
+              <p className="text-[#E5989B] font-bold text-lg mb-6">
+                Total: R$ {totalCarrinhoAtual.toFixed(2).replace(".", ",")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirming(false)}
+                  className="flex-1 py-3 rounded-full border border-rose-100 text-[#8C7A70] font-bold hover:bg-rose-50 transition-colors"
+                >
+                  Voltar
+                </button>
+                <button
+                  onClick={() => {
+                    setConfirming(false);
+                    finalizarPedido();
+                  }}
+                  className="flex-1 py-3 rounded-full bg-[#25D366] text-white font-bold hover:bg-[#1fb355] transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Enviar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="max-w-4xl mx-auto relative z-10">
         <header className="mb-12 flex items-center justify-between border-b border-rose-100 pb-8">
@@ -176,8 +235,8 @@ export default function Checkout() {
                           </span>
                         </div>
                       )}
-                      
-                      {/* Mostrar Casca no topo apenas se NÃO for kit multi */}
+
+                      {/* Casca no topo apenas para ovo único */}
                       {!(item.ovos && item.ovos.length > 1) && (
                         <>
                           <div className="flex justify-between border-b border-rose-50 pb-2">
@@ -206,36 +265,36 @@ export default function Checkout() {
                             <p className="text-[10px] uppercase tracking-widest font-black text-[#E5989B] mb-2">
                               Composição do Kit
                             </p>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                               {item.ovos.map((ovo, i) => {
-                                 const nomeSabor = getNomeOpcao("saborCasca", ovo.saborCasca);
-                                 const nomeTextura = getNomeOpcao("tipoCasca", ovo.tipoCasca);
-                                 const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
-                                 const nomeCobertura = ovo.cobertura
-                                   ? getNomeOpcao("cobertura", ovo.cobertura)
-                                   : null;
-                                 return (
-                                   <div
-                                     key={i}
-                                     className="flex items-start gap-2 bg-rose-50/60 rounded-xl px-3 py-2 ring-1 ring-rose-100"
-                                   >
-                                     <span className="w-5 h-5 bg-[#E5989B] text-white rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
-                                       {i + 1}
-                                     </span>
-                                     <div className="text-xs">
-                                       <div className="font-bold text-[#5A2C1D]">
-                                         {nomeSabor} ({nomeTextura})
-                                       </div>
-                                       {item.tipoOvo !== "tradicional" && (
-                                         <div className="text-[#8C7A70] mt-0.5">
-                                           {nomeRecheio}{nomeCobertura && ` + ${nomeCobertura}`}
-                                         </div>
-                                       )}
-                                     </div>
-                                   </div>
-                                 );
-                               })}
-                             </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {item.ovos.map((ovo, i) => {
+                                const nomeSabor = getNomeOpcao("saborCasca", ovo.saborCasca);
+                                const nomeTextura = getNomeOpcao("tipoCasca", ovo.tipoCasca);
+                                const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
+                                const nomeCobertura = ovo.cobertura
+                                  ? getNomeOpcao("cobertura", ovo.cobertura)
+                                  : null;
+                                return (
+                                  <div
+                                    key={i}
+                                    className="flex items-start gap-2 bg-rose-50/60 rounded-xl px-3 py-2 ring-1 ring-rose-100"
+                                  >
+                                    <span className="w-5 h-5 bg-[#E5989B] text-white rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
+                                      {i + 1}
+                                    </span>
+                                    <div className="text-xs">
+                                      <div className="font-bold text-[#5A2C1D]">
+                                        {nomeSabor} ({nomeTextura})
+                                      </div>
+                                      {item.tipoOvo !== "tradicional" && (
+                                        <div className="text-[#8C7A70] mt-0.5">
+                                          {nomeRecheio}{nomeCobertura && ` + ${nomeCobertura}`}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </>
                         ) : (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 text-sm text-[#8C7A70]">
@@ -261,11 +320,12 @@ export default function Checkout() {
 
                   <div className="flex items-center justify-between md:flex-col md:items-end gap-6 min-w-[140px]">
                     <div className="text-3xl font-bold text-[#E5989B]">
-                      R$ {item.precoTotal.toFixed(2).replace(".", ",")}
+                      R$ {calcularPrecoTotal(item).toFixed(2).replace(".", ",")}
                     </div>
+                    {/* Botão de lixeira sempre visível (inclusive mobile) */}
                     <button
                       onClick={() => removeFromCart(item.id)}
-                      className="p-4 text-rose-200 hover:text-red-400 transition-colors bg-rose-50/50 rounded-2xl md:opacity-0 group-hover:opacity-100"
+                      className="p-4 text-rose-200 hover:text-red-400 transition-colors bg-rose-50/50 rounded-2xl"
                     >
                       <Trash2 className="w-6 h-6" />
                     </button>
@@ -283,12 +343,12 @@ export default function Checkout() {
                 Total do Pedido
               </span>
               <div className="text-5xl md:text-7xl font-bold text-[#E5989B]">
-                R$ {totalCarrinho.toFixed(2).replace(".", ",")}
+                R$ {totalCarrinhoAtual.toFixed(2).replace(".", ",")}
               </div>
             </div>
-            <div className="flex flex-col gap-5 min-w-[320px]">
+            <div className="flex flex-col gap-5 w-full md:w-auto md:min-w-[280px]">
               <motion.button
-                onClick={finalizarPedido}
+                onClick={() => setConfirming(true)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-[#25D366] text-white py-5 px-10 rounded-full font-black text-xl shadow-xl flex items-center justify-center gap-4 hover:bg-[#1fb355] transition-all"
