@@ -102,6 +102,8 @@ export default function Builder() {
   }
 
   function selectOvo(campo, valor) {
+    let deveScrollar = false;
+
     setPedido((prev) => {
       const novosOvos = prev.ovos.map((ovo, i) => {
         if (i !== prev.ovoAtivo) return ovo;
@@ -119,13 +121,18 @@ export default function Builder() {
           const proximoOvo = prev.ovos[prev.ovoAtivo + 1];
           if (!ovoCompleto(proximoOvo, prev.tipoOvo)) {
             proximoOvoAtivo = prev.ovoAtivo + 1;
-            scrollToKitSection();
+            deveScrollar = true; // sinaliza para scrollar FORA do updater
           }
         }
       }
 
       return { ...prev, ovos: novosOvos, ovoAtivo: proximoOvoAtivo };
     });
+
+    // Side-effect fora do updater — chamado depois do setState
+    if (deveScrollar) {
+      scrollToKitSection();
+    }
   }
 
   const isKitMulti = pedido.ovos.length > 1;
