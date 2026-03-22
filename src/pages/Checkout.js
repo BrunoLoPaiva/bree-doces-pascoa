@@ -87,10 +87,14 @@ export default function Checkout() {
     msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinhoAtual.toFixed(2).replace(".", ",")}*\n\n`;
     msg += `Aguardando confirmação e dados para pagamento!`;
 
-    // Limpar carrinho ANTES do redirect para evitar pedidos duplicados
-    // (se o redirect for instantâneo, o setTimeout nunca executaria)
-    clearCart();
+    // Dispara o redirecionamento primeiro
     window.location.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+    
+    // Limpa o carrinho após 2 segundos (dá tempo do navegador processar a saída da página
+    // ou o pop-up de "Abrir WhatsApp" do dispositivo, sem perder o pedido se cancelar)
+    setTimeout(() => {
+      clearCart();
+    }, 2000);
   }
 
   if (cart.length === 0) {

@@ -115,9 +115,12 @@ export default function Builder() {
       let proximoOvoAtivo = prev.ovoAtivo;
       if (isKitMultiLocal && prev.ovoAtivo < prev.ovos.length - 1) {
         if (ovoCompleto(ovoResultante, prev.tipoOvo)) {
-          proximoOvoAtivo = prev.ovoAtivo + 1;
-          // Scroll suave até o topo da seção kit
-          scrollToKitSection();
+          // Só avança sozinho se o PRÓXIMO ovo ainda não estiver completo
+          const proximoOvo = prev.ovos[prev.ovoAtivo + 1];
+          if (!ovoCompleto(proximoOvo, prev.tipoOvo)) {
+            proximoOvoAtivo = prev.ovoAtivo + 1;
+            scrollToKitSection();
+          }
         }
       }
 
