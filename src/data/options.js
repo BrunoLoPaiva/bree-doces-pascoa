@@ -115,68 +115,68 @@ export const coberturas = [
   {
     id: "kitkat",
     nome: "Kit Kat",
-    // Preço dinâmico por tamanho
-    precos: { 50: 1.0, 150: 2.5, 250: 4.0, 350: 5.0, 500: 6.0 },
+    // Preço dinâmico por tamanho (chaves string para consistência com tamanhoId)
+    precos: { "50": 1.0, "150": 2.5, "250": 4.0, "350": 5.0, "500": 6.0 },
     img: "https://t4.ftcdn.net/jpg/04/29/25/71/360_F_429257188_Aaj8zVjlQH70PZOzWomqS8X0EJgxhrkh.jpg",
   },
   {
     id: "confete",
     nome: "Confete",
-    precos: { 50: 0.5, 150: 1.5, 250: 2.5, 350: 3.5, 500: 5.0 },
+    precos: { "50": 0.5, "150": 1.5, "250": 2.5, "350": 3.5, "500": 5.0 },
     img: "https://img.freepik.com/fotos-premium/doces-coloridos-fundo-de-doces-coloridos-fundo-preto_259266-125.jpg",
   },
   {
     id: "bis",
     nome: "Bis",
-    precos: { 50: 0.5, 150: 1.5, 250: 2.0, 350: 3.0, 500: 4.0 },
+    precos: { "50": 0.5, "150": 1.5, "250": 2.0, "350": 3.0, "500": 4.0 },
     img: "https://62e4b2026e.cbaul-cdnwnd.com/7d4de7735f3389e81299f8124c6078a3/200000135-42bb342bb5/1007-bis-lacta.jpg?ph=62e4b2026e",
   },
   {
     id: "kinder",
     nome: "Kinder Bueno",
-    precos: { 50: 2.5, 150: 4.5, 250: 6.5, 350: 9.0, 500: 11.0 },
+    precos: { "50": 2.5, "150": 4.5, "250": 6.5, "350": 9.0, "500": 11.0 },
     img: "https://funchal.vtexassets.com/arquivos/ids/248156/foto_1_002.jpg?v=638461251121300000",
   },
   {
     id: "oreo",
     nome: "Oreo",
-    precos: { 50: 1.0, 150: 2.5, 250: 4.0, 350: 5.0, 500: 6.0 },
+    precos: { "50": 1.0, "150": 2.5, "250": 4.0, "350": 5.0, "500": 6.0 },
     img: "https://www.hola.com/horizon/original_aspect_ratio/1cc376d18717-adobe-oreo-1-a.jpg",
   },
   {
     id: "brownie",
     nome: "Brownie",
-    precos: { 50: 1.5, 150: 3.0, 250: 4.5, 350: 6.0, 500: 7.0 },
+    precos: { "50": 1.5, "150": 3.0, "250": 4.5, "350": 6.0, "500": 7.0 },
     img: "https://bakeandcakegourmet.com.br/uploads/site/receitas/brownie-a61d7xl1.jpg",
   },
   {
     id: "ovomaltine",
     nome: "Ovomaltine Rocks",
-    precos: { 50: 2.0, 150: 3.0, 250: 4.0, 350: 5.0, 500: 6.0 },
+    precos: { "50": 2.0, "150": 3.0, "250": 4.0, "350": 5.0, "500": 6.0 },
     img: "https://cdn.dooca.store/259/products/yjxtg0fth3no3zstkjvg1ut0nif4malmvkoq_640x640+fill_ffffff.jpg?v=1582745557&webp=0",
   },
   {
     id: "morango",
     nome: "Morango Fresco",
-    precos: { 50: 1.5, 150: 3.5, 250: 5.0, 350: 6.5, 500: 8.0 },
+    precos: { "50": 1.5, "150": 3.5, "250": 5.0, "350": 6.5, "500": 8.0 },
     img: "https://image.tuasaude.com/media/article/na/qf/beneficios-do-morango_39335.jpg?width=686&height=487",
   },
   {
     id: "nutella",
     nome: "Nutella Extra",
-    precos: { 50: 2.0, 150: 4.5, 250: 7.0, 350: 9.0, 500: 12.0 },
+    precos: { "50": 2.0, "150": 4.5, "250": 7.0, "350": 9.0, "500": 12.0 },
     img: "https://t4.ftcdn.net/jpg/03/40/59/61/360_F_340596198_RZ7WYwBq4LI12BfJZEE2AMOfWv0zNJOf.jpg",
   },
   {
     id: "granule",
     nome: "Granule",
-    precos: { 50: 1.5, 150: 2.5, 250: 3.5, 350: 4.5, 500: 5.5 },
+    precos: { "50": 1.5, "150": 2.5, "250": 3.5, "350": 4.5, "500": 5.5 },
     img: "https://docemalu.vtexassets.com/arquivos/ids/5368117-800-auto?v=639021241434670000&width=800&height=auto&aspect=true",
   },
   {
     id: "amendoim",
     nome: "Amendoim",
-    precos: { 50: 1, 150: 2, 250: 3, 350: 4, 500: 5 },
+    precos: { "50": 1, "150": 2, "250": 3, "350": 4, "500": 5 },
     img: "https://inovanuts.cdn.magazord.com.br/img/2023/03/produto/457/granulado-de-amendoim.jpg",
   },
 ];
@@ -217,8 +217,7 @@ export const calcularPrecoTotal = (pedido) => {
   const tam = tamanhos.find((t) => t.id === tamanhoId);
   if (!tam) {
     console.warn("[calcularPrecoTotal] Tamanho inválido:", pedido.tamanho);
-    // Fallback: usar precoTotal armazenado se disponível
-    return pedido.precoTotal || 0;
+    return 0;
   }
 
   // Preço base por ovo (casca, sem recheio/cobertura)
@@ -260,13 +259,7 @@ export const calcularPrecoTotal = (pedido) => {
       const cobertura = calcularCoberturaOvo(ovo.cobertura);
       return acc + base + recheio + cobertura;
     }, 0);
-    const resultado = Math.max(0, totalOvos - desconto);
-    // Safety: se resultado for 0 mas temos um precoTotal armazenado válido, usar fallback
-    if (resultado === 0 && pedido.precoTotal > 0) {
-      console.warn("[calcularPrecoTotal] Resultado 0 inesperado, usando precoTotal armazenado:", pedido.precoTotal);
-      return pedido.precoTotal;
-    }
-    return resultado;
+    return Math.max(0, totalOvos - desconto);
   }
 
   // Fallback: formato legado (campo plano)
@@ -275,13 +268,7 @@ export const calcularPrecoTotal = (pedido) => {
     calcularRecheioOvo(pedido.recheio) +
     calcularCoberturaOvo(pedido.cobertura);
   const multiplicador = k ? k.mult : 1;
-  const resultado = Math.max(0, totalPorOvo * multiplicador - desconto);
-  // Safety: mesma lógica de fallback
-  if (resultado === 0 && pedido.precoTotal > 0) {
-    console.warn("[calcularPrecoTotal] Resultado 0 inesperado (legado), usando precoTotal armazenado:", pedido.precoTotal);
-    return pedido.precoTotal;
-  }
-  return resultado;
+  return Math.max(0, totalPorOvo * multiplicador - desconto);
 };
 
 export const getNomeOpcao = (categoria, id) => {

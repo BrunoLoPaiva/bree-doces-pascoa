@@ -28,7 +28,8 @@ export function CartProvider({ children }) {
 
   const addToCart = (pedido, precoTotal) => {
     // Usar functional updater para evitar stale closure — sempre usa o estado mais recente
-    setCart((prev) => [...prev, { ...pedido, precoTotal, id: Date.now() }]);
+    const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+    setCart((prev) => [...prev, { ...pedido, precoTotal, id: generateId() }]);
   };
 
   const removeFromCart = (id) => {
@@ -39,11 +40,9 @@ export function CartProvider({ children }) {
     setCart([]);
   };
 
-  // Recalcular o total dinamicamente para evitar preço armazenado desatualizado
+  // Recalcular o total dinamicamente — sem fallback para forçar detecção de bugs
   const totalCarrinho = cart.reduce((acc, item) => {
-    const precoCalculado = calcularPrecoTotal(item);
-    // Fallback: se o cálculo retornar 0 mas há precoTotal armazenado, usar o armazenado
-    return acc + (precoCalculado > 0 ? precoCalculado : (item.precoTotal || 0));
+    return acc + calcularPrecoTotal(item);
   }, 0);
 
   return (

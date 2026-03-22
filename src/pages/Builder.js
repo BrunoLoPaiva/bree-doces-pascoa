@@ -524,15 +524,15 @@ export default function Builder() {
                   {/* === RECHEIO === */}
                   <div className="mb-10 md:mb-12">
                     <p className={`text-base font-bold mb-4 flex items-center gap-2 transition-opacity duration-300 ${
-                      (!isKitMulti || (ovoAtual.saborCasca && ovoAtual.tipoCasca)) ? "text-[#5A2C1D]" : "text-[#8C7A70] opacity-50"
+                      (ovoAtual.saborCasca && ovoAtual.tipoCasca) ? "text-[#5A2C1D]" : "text-[#8C7A70] opacity-50"
                     }`}>
                       <span className={`w-6 h-6 rounded-full text-xs flex items-center justify-center font-black transition-colors duration-300 ${
-                        (!isKitMulti || (ovoAtual.saborCasca && ovoAtual.tipoCasca)) ? "bg-[#E5989B] text-white" : "bg-rose-100 text-[#8C7A70]"
+                        (ovoAtual.saborCasca && ovoAtual.tipoCasca) ? "bg-[#E5989B] text-white" : "bg-rose-100 text-[#8C7A70]"
                       }`}>{isKitMulti ? "3" : "1"}</span>
                       Recheio{ovoAtual.recheio && <span className="text-[#E5989B] text-sm font-normal">— {getNomeOpcao("recheio", ovoAtual.recheio)}</span>}
                     </p>
                     <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-opacity duration-300 ${
-                      (!isKitMulti || (ovoAtual.saborCasca && ovoAtual.tipoCasca)) ? "opacity-100" : "opacity-40 pointer-events-none"
+                      (ovoAtual.saborCasca && ovoAtual.tipoCasca) ? "opacity-100" : "opacity-40 pointer-events-none"
                     }`}>
                       {recheios.map((r) => {
                         const valRecheio =

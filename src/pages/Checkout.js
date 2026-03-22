@@ -42,8 +42,9 @@ export default function Checkout() {
 
       // Casca (apenas para ovo único)
       if (!isKitMulti) {
-        addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
-        addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
+        const ovoUnico = item.ovos?.[0] || {};
+        addLine("Sabor da Casca", getNomeOpcao("saborCasca", ovoUnico.saborCasca || item.saborCasca));
+        addLine("Textura da Casca", getNomeOpcao("tipoCasca", ovoUnico.tipoCasca || item.tipoCasca));
       }
 
       if (isKitMulti) {
@@ -86,14 +87,10 @@ export default function Checkout() {
     msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinhoAtual.toFixed(2).replace(".", ",")}*\n\n`;
     msg += `Aguardando confirmação e dados para pagamento!`;
 
-    // Redirecionar primeiro e limpar o carrinho depois com pequeno delay
-    // para garantir que o redirect ocorra antes de qualquer re-render
+    // Limpar carrinho ANTES do redirect para evitar pedidos duplicados
+    // (se o redirect for instantâneo, o setTimeout nunca executaria)
+    clearCart();
     window.location.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
-
-    // Limpar carrinho após o redirecionamento
-    setTimeout(() => {
-      clearCart();
-    }, 500);
   }
 
   if (cart.length === 0) {
@@ -247,13 +244,13 @@ export default function Checkout() {
                               Sabor da Casca:
                             </span>
                             <span className="text-[#5A2C1D] font-bold">
-                              {getNomeOpcao("saborCasca", item.saborCasca)}
+                              {getNomeOpcao("saborCasca", item.ovos?.[0]?.saborCasca || item.saborCasca)}
                             </span>
                           </div>
                           <div className="flex justify-between border-b border-rose-50 pb-2">
                             <span className="font-sans opacity-70">Textura:</span>
                             <span className="text-[#5A2C1D] font-bold">
-                              {getNomeOpcao("tipoCasca", item.tipoCasca)}
+                              {getNomeOpcao("tipoCasca", item.ovos?.[0]?.tipoCasca || item.tipoCasca)}
                             </span>
                           </div>
                         </>

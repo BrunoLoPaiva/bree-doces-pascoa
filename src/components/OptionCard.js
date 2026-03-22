@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 export default function OptionCard({ option, selected, onClick, className = "" }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <motion.div
       onClick={onClick}
@@ -13,11 +16,18 @@ export default function OptionCard({ option, selected, onClick, className = "" }
       } ${className}`}
     >
       <div className="aspect-video w-full overflow-hidden bg-rose-50/50">
-        <img
-          src={option.img}
-          alt={option.nome}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-        />
+        {!imgError ? (
+          <img
+            src={option.img}
+            alt={option.nome}
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-rose-50 text-[#8C7A70] text-xs font-semibold px-2 text-center">
+            {option.nome}
+          </div>
+        )}
       </div>
       <div className="p-3 lg:p-4 bg-white relative z-10 flex flex-col items-start gap-2">
         <h3 className="text-sm xl:text-base font-semibold text-[#5A2C1D] leading-tight font-sans">

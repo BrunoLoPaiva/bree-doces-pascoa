@@ -45,10 +45,12 @@ export default function Summary({ pedido }) {
     // Prevenir duplo clique
     if (!pedidoCompleto || added) return;
 
+    // Remover ovoAtivo (estado de UI) antes de enviar ao carrinho
+    const { ovoAtivo, ...pedidoLimpo } = pedido;
+
     const pedidoParaCarrinho = {
-      ...pedido,
-      saborCasca: pedido.ovos[0]?.saborCasca,
-      tipoCasca: pedido.ovos[0]?.tipoCasca,
+      ...pedidoLimpo,
+      // Mantemos a estrutura original intacta, lendo sempre de item.ovos[0] no checkout
     };
 
     addToCart(pedidoParaCarrinho, precoTotal);
@@ -81,13 +83,13 @@ export default function Summary({ pedido }) {
           fixed bottom-0 left-0 w-full 
           bg-white/80 backdrop-blur-md 
           rounded-t-[2.5rem] 
-          p-5 md:p-6
+          p-4 sm:p-5 md:p-6
           shadow-[0_-10px_40px_rgba(244,194,194,0.15)] 
           z-50 
           ring-1 ring-rose-100 
           flex flex-col
 
-          min-h-[120px] md:min-h-[140px]
+          min-h-[100px] sm:min-h-[120px] md:min-h-[140px]
 
           lg:bottom-10 lg:right-10 lg:left-auto lg:w-96 
           lg:rounded-[2rem] lg:p-8 lg:shadow-2xl
