@@ -86,11 +86,14 @@ export default function Checkout() {
     msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinhoAtual.toFixed(2).replace(".", ",")}*\n\n`;
     msg += `Aguardando confirmação e dados para pagamento!`;
 
-    // Limpar o carrinho antes de redirecionar para evitar pedidos duplicados pós-fechar o site
-    clearCart();
-
-    // Usar location.href para evitar bloqueio de popup blocker
+    // Redirecionar primeiro e limpar o carrinho depois com pequeno delay
+    // para garantir que o redirect ocorra antes de qualquer re-render
     window.location.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+
+    // Limpar carrinho após o redirecionamento
+    setTimeout(() => {
+      clearCart();
+    }, 500);
   }
 
   if (cart.length === 0) {
@@ -362,6 +365,11 @@ export default function Checkout() {
                   <span className="text-lg">💳</span>
                   Aceitamos Pix, Cartões de Débito e Crédito (sujeito a taxas
                   das operadoras).
+                </div>
+                <div className="hidden sm:block opacity-20">|</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-lg">💵</span>
+                  Confirmação do pedido mediante pagamento de 50% do valor total.
                 </div>
                 <div className="hidden sm:block opacity-20">|</div>
                 <div className="flex items-center gap-1.5">

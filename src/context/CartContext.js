@@ -1,5 +1,6 @@
 // src/context/CartContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { calcularPrecoTotal } from '../data/options';
 
 const CartContext = createContext();
 const CART_KEY = 'bree_pascoa_cart';
@@ -26,18 +27,24 @@ export function CartProvider({ children }) {
   }, [cart]);
 
   const addToCart = (pedido, precoTotal) => {
-    setCart([...cart, { ...pedido, precoTotal, id: Date.now() }]);
+    // Usar functional updater para evitar stale closure — sempre usa o estado mais recente
+    setCart((prev) => [...prev, { ...pedido, precoTotal, id: Date.now() }]);
   };
 
   const removeFromCart = (id) => {
-    setCart(cart.filter(item => item.id !== id));
+    setCart((prev) => prev.filter(item => item.id !== id));
   };
 
   const clearCart = () => {
     setCart([]);
   };
 
-  const totalCarrinho = cart.reduce((acc, item) => acc + item.precoTotal, 0);
+  // Recalcular o total dinamicamente para evitar preço armazenado desatualizado
+  const totalCarrinho = cart.reduce((acc, item) => {
+    const precoCalculado = calcularPrecoTotal(item);
+    // Fallback: se o cálculo retornar 0 mas há precoTotal armazenado, usar o armazenado
+    return acc + (precoCalculado > 0 ? precoCalculado : (item.precoTotal || 0));
+  }, 0);
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, totalCarrinho }}>

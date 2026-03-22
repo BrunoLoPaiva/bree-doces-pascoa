@@ -62,7 +62,7 @@ export const recheios = [
   },
   {
     id: "dois_amores",
-    nome: "Dois Amores",
+    nome: "Dois Amores (Ninho c/ Brigadeiro)",
     categoria: "premium",
     cor: "#8b5a2b",
     preco: 0,
@@ -209,10 +209,17 @@ export const tabelaRecheios = {
 };
 
 // --- FUNÇÃO CENTRAL DE PRECIFICAÇÃO ---
-// --- FUNÇÃO CENTRAL DE PRECIFICAÇÃO ATUALIZADA ---
 export const calcularPrecoTotal = (pedido) => {
-  const tam = tamanhos.find((t) => t.id === pedido.tamanho);
-  if (!tam) return 0;
+  if (!pedido) return 0;
+
+  // Normalizar tamanho: garantir que é string para busca correta
+  const tamanhoId = String(pedido.tamanho || "");
+  const tam = tamanhos.find((t) => t.id === tamanhoId);
+  if (!tam) {
+    console.warn("[calcularPrecoTotal] Tamanho inválido:", pedido.tamanho);
+    // Fallback: usar precoTotal armazenado se disponível
+    return pedido.precoTotal || 0;
+  }
 
   // Preço base por ovo (casca, sem recheio/cobertura)
   const calcularBasePorOvo = (tipoCascaId) => {
@@ -226,14 +233,14 @@ export const calcularPrecoTotal = (pedido) => {
     if (pedido.tipoOvo === "tradicional" || !recheioId) return 0;
     const rech = recheios.find((r) => r.id === recheioId);
     if (!rech) return 0;
-    return tabelaRecheios[rech.categoria]?.[pedido.tamanho]?.[pedido.tipoOvo] || 0;
+    return tabelaRecheios[rech.categoria]?.[tamanhoId]?.[pedido.tipoOvo] || 0;
   };
 
   // Preço adicional da cobertura de um ovo específico
   const calcularCoberturaOvo = (coberturaId) => {
     if (pedido.tipoOvo !== "colher" || !coberturaId) return 0;
     const cob = coberturas.find((c) => c.id === coberturaId);
-    return cob?.precos?.[pedido.tamanho] || 0;
+    return cob?.precos?.[tamanhoId] || 0;
   };
 
   // Desconto por kit
@@ -245,7 +252,7 @@ export const calcularPrecoTotal = (pedido) => {
     else if (k.id === "quarteto") desconto = 10.0;
   }
 
-  // Se usa novo formato com array de ovos individuais
+  // Se usa formato com array de ovos individuais
   if (pedido.ovos && pedido.ovos.length > 0) {
     const totalOvos = pedido.ovos.reduce((acc, ovo) => {
       const base = calcularBasePorOvo(ovo.tipoCasca || pedido.tipoCasca);
@@ -253,7 +260,13 @@ export const calcularPrecoTotal = (pedido) => {
       const cobertura = calcularCoberturaOvo(ovo.cobertura);
       return acc + base + recheio + cobertura;
     }, 0);
-    return Math.max(0, totalOvos - desconto);
+    const resultado = Math.max(0, totalOvos - desconto);
+    // Safety: se resultado for 0 mas temos um precoTotal armazenado válido, usar fallback
+    if (resultado === 0 && pedido.precoTotal > 0) {
+      console.warn("[calcularPrecoTotal] Resultado 0 inesperado, usando precoTotal armazenado:", pedido.precoTotal);
+      return pedido.precoTotal;
+    }
+    return resultado;
   }
 
   // Fallback: formato legado (campo plano)
@@ -262,7 +275,13 @@ export const calcularPrecoTotal = (pedido) => {
     calcularRecheioOvo(pedido.recheio) +
     calcularCoberturaOvo(pedido.cobertura);
   const multiplicador = k ? k.mult : 1;
-  return Math.max(0, totalPorOvo * multiplicador - desconto);
+  const resultado = Math.max(0, totalPorOvo * multiplicador - desconto);
+  // Safety: mesma lógica de fallback
+  if (resultado === 0 && pedido.precoTotal > 0) {
+    console.warn("[calcularPrecoTotal] Resultado 0 inesperado (legado), usando precoTotal armazenado:", pedido.precoTotal);
+    return pedido.precoTotal;
+  }
+  return resultado;
 };
 
 export const getNomeOpcao = (categoria, id) => {
