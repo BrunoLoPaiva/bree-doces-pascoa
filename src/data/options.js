@@ -23,7 +23,7 @@ export const tiposCasca = [
     id: "crocante",
     nome: "Crocante (com amendoim)",
     preco: 0,
-    img: "crocante.webp",
+    img: "https://i.ytimg.com/vi/SRvA-dWi9zc/maxresdefault.jpg",
   }, // Preço calculado dinamicamente
 ];
 
