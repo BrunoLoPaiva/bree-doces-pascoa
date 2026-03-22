@@ -102,26 +102,36 @@ export default function Builder() {
   }
 
   function selectOvo(campo, valor) {
+    // 1. Prevemos se a escolha atual completará o ovo ANTES do setState,
+    //    usando o closure atual do pedido para evitar mutação dentro do updater
+    const ovoAtualSimulado = { ...pedido.ovos[pedido.ovoAtivo], [campo]: valor };
+    const isKitMultiLocal = pedido.ovos.length > 1;
     let deveScrollar = false;
 
+    if (isKitMultiLocal && pedido.ovoAtivo < pedido.ovos.length - 1) {
+      if (ovoCompleto(ovoAtualSimulado, pedido.tipoOvo)) {
+        const proximoOvo = pedido.ovos[pedido.ovoAtivo + 1];
+        if (!ovoCompleto(proximoOvo, pedido.tipoOvo)) {
+          deveScrollar = true;
+        }
+      }
+    }
+
+    // 2. Updater puro — sem efeitos colaterais nem mutação de closure
     setPedido((prev) => {
       const novosOvos = prev.ovos.map((ovo, i) => {
         if (i !== prev.ovoAtivo) return ovo;
-        const novoOvo = { ...ovo, [campo]: valor };
-        return novoOvo;
+        return { ...ovo, [campo]: valor };
       });
 
       const ovoResultante = novosOvos[prev.ovoAtivo];
-      const isKitMultiLocal = prev.ovos.length > 1;
-
       let proximoOvoAtivo = prev.ovoAtivo;
+
       if (isKitMultiLocal && prev.ovoAtivo < prev.ovos.length - 1) {
         if (ovoCompleto(ovoResultante, prev.tipoOvo)) {
-          // Só avança sozinho se o PRÓXIMO ovo ainda não estiver completo
           const proximoOvo = prev.ovos[prev.ovoAtivo + 1];
           if (!ovoCompleto(proximoOvo, prev.tipoOvo)) {
             proximoOvoAtivo = prev.ovoAtivo + 1;
-            deveScrollar = true; // sinaliza para scrollar FORA do updater
           }
         }
       }
@@ -129,7 +139,7 @@ export default function Builder() {
       return { ...prev, ovos: novosOvos, ovoAtivo: proximoOvoAtivo };
     });
 
-    // Side-effect fora do updater — chamado depois do setState
+    // 3. Side-effect disparado de forma síncrona, decisão já tomada antes do setPedido
     if (deveScrollar) {
       scrollToKitSection();
     }
