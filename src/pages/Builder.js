@@ -13,6 +13,7 @@ import {
   tamanhos,
   kits,
   tabelaRecheios,
+  getNomeOpcao,
 } from "../data/options";
 
 function criarOvoInicial() {
@@ -408,8 +409,8 @@ export default function Builder() {
                         <span>Ovo {idx + 1}</span>
                         {concluido && !isAtivo && (
                           <span className="hidden sm:inline text-[10px] opacity-70 font-normal">
-                             {saboresCasca.find((s) => s.id === ovo.saborCasca)?.nome?.split(" ")[0]}
-                             {ovo.recheio && <> • {recheios.find((r) => r.id === ovo.recheio)?.nome?.split(" ")[0]}</>}
+                             {getNomeOpcao("saborCasca", ovo.saborCasca).split(" ")[0]}
+                             {ovo.recheio && <> • {getNomeOpcao("recheio", ovo.recheio).split(" ")[0]}</>}
                           </span>
                         )}
                       </button>
@@ -433,7 +434,7 @@ export default function Builder() {
                       <div className="mb-10 md:mb-12">
                         <p className="text-base font-bold text-[#5A2C1D] mb-4 flex items-center gap-2">
                           <span className="w-6 h-6 rounded-full bg-[#E5989B] text-white text-xs flex items-center justify-center font-black">1</span>
-                          Sabor do Chocolate{ovoAtual.saborCasca && <span className="text-[#E5989B] text-sm font-normal">— {saboresCasca.find((s) => s.id === ovoAtual.saborCasca)?.nome}</span>}
+                          Sabor do Chocolate{ovoAtual.saborCasca && <span className="text-[#E5989B] text-sm font-normal">— {getNomeOpcao("saborCasca", ovoAtual.saborCasca)}</span>}
                         </p>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {saboresCasca.map((s) => (
@@ -454,7 +455,7 @@ export default function Builder() {
                           <span className={`w-6 h-6 rounded-full text-xs flex items-center justify-center font-black transition-colors duration-300 ${
                             ovoAtual.saborCasca ? "bg-[#E5989B] text-white" : "bg-rose-100 text-[#8C7A70]"
                           }`}>2</span>
-                          Textura da Casca{ovoAtual.tipoCasca && <span className="text-[#E5989B] text-sm font-normal">— {tiposCasca.find((t) => t.id === ovoAtual.tipoCasca)?.nome}</span>}
+                          Textura da Casca{ovoAtual.tipoCasca && <span className="text-[#E5989B] text-sm font-normal">— {getNomeOpcao("tipoCasca", ovoAtual.tipoCasca)}</span>}
                         </p>
                         <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-opacity duration-300 ${
                           ovoAtual.saborCasca ? "opacity-100" : "opacity-40 pointer-events-none"
@@ -486,7 +487,7 @@ export default function Builder() {
                       <span className={`w-6 h-6 rounded-full text-xs flex items-center justify-center font-black transition-colors duration-300 ${
                         (!isKitMulti || (ovoAtual.saborCasca && ovoAtual.tipoCasca)) ? "bg-[#E5989B] text-white" : "bg-rose-100 text-[#8C7A70]"
                       }`}>{isKitMulti ? "3" : "1"}</span>
-                      Recheio{ovoAtual.recheio && <span className="text-[#E5989B] text-sm font-normal">— {recheios.find((r) => r.id === ovoAtual.recheio)?.nome}</span>}
+                      Recheio{ovoAtual.recheio && <span className="text-[#E5989B] text-sm font-normal">— {getNomeOpcao("recheio", ovoAtual.recheio)}</span>}
                     </p>
                     <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-opacity duration-300 ${
                       (!isKitMulti || (ovoAtual.saborCasca && ovoAtual.tipoCasca)) ? "opacity-100" : "opacity-40 pointer-events-none"
@@ -517,7 +518,7 @@ export default function Builder() {
                         <span className={`w-6 h-6 rounded-full text-xs flex items-center justify-center font-black transition-colors duration-300 ${
                           ovoAtual.recheio ? "bg-[#E5989B] text-white" : "bg-rose-100 text-[#8C7A70]"
                         }`}>{isKitMulti ? "4" : "2"}</span>
-                        Topper{ovoAtual.cobertura && <span className="text-[#E5989B] text-sm font-normal">— {coberturas.find((c) => c.id === ovoAtual.cobertura)?.nome}</span>}
+                        Topper{ovoAtual.cobertura && <span className="text-[#E5989B] text-sm font-normal">— {getNomeOpcao("cobertura", ovoAtual.cobertura)}</span>}
                         {!ovoAtual.recheio && <span className="text-xs font-normal italic opacity-60">(escolha o recheio primeiro)</span>}
                       </p>
                       <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-opacity duration-300 ${

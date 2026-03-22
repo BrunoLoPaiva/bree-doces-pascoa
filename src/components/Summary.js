@@ -171,12 +171,12 @@ export default function Summary({ pedido }) {
                   Ovos do Kit
                 </p>
                 {pedido.ovos.map((ovo, idx) => {
-                  const nomeRecheio = recheios.find((r) => r.id === ovo.recheio)?.nome || "—";
+                  const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
                   const nomeCobertura = ovo.cobertura
-                    ? coberturas.find((c) => c.id === ovo.cobertura)?.nome
+                    ? getNomeOpcao("cobertura", ovo.cobertura)
                     : null;
-                  const nomeSabor = saboresCasca.find((s) => s.id === ovo.saborCasca)?.nome || "—";
-                  const nomeTextura = tiposCasca.find((t) => t.id === ovo.tipoCasca)?.nome || "—";
+                  const nomeSabor = getNomeOpcao("saborCasca", ovo.saborCasca);
+                  const nomeTextura = getNomeOpcao("tipoCasca", ovo.tipoCasca);
                   return (
                     <div
                       key={idx}

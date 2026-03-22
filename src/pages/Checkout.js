@@ -29,35 +29,48 @@ export default function Checkout() {
         if (value) msg += `*${label}:* ${value}\n`;
       };
 
-      // Casca
-      addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
-      addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
+      const isKitMulti = item.ovos && item.ovos.length > 1;
+
+      // Casca (Mostrar no topo apenas se NÃO for kit multi)
+      if (!isKitMulti) {
+        addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
+        addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
+      }
 
       // Kit e ovos individuais
-      if (item.tipoOvo !== "tradicional") {
-        const isKitMulti = item.ovos && item.ovos.length > 1;
-
-        if (isKitMulti) {
-          addLine("Formato", getNomeOpcao("kit", item.kit));
-          msg += `*Composição:*\n`;
-          item.ovos.forEach((ovo, i) => {
-            const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
-            const nomeCobertura = ovo.cobertura
-              ? ` + ${getNomeOpcao("cobertura", ovo.cobertura)}`
-              : "";
-            msg += `  Ovo ${i + 1}: ${nomeRecheio}${nomeCobertura}\n`;
-          });
-        } else {
-          // Ovo único
-          if (item.kit && item.kit !== "unidade") {
-            addLine("Formato", getNomeOpcao("kit", item.kit));
+      if (isKitMulti) {
+        addLine("Formato", getNomeOpcao("kit", item.kit));
+        msg += `*Composição:*\n`;
+        item.ovos.forEach((ovo, i) => {
+          const nomeSabor = getNomeOpcao("saborCasca", ovo.saborCasca);
+          const nomeTextura = getNomeOpcao("tipoCasca", ovo.tipoCasca);
+          const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
+          const nomeCobertura = ovo.cobertura
+            ? ` + ${getNomeOpcao("cobertura", ovo.cobertura)}`
+            : "";
+          
+          if (item.tipoOvo === "tradicional") {
+            msg += `  Ovo ${i + 1}: ${nomeSabor} (${nomeTextura})\n`;
+          } else {
+            msg += `  Ovo ${i + 1}: ${nomeSabor} (${nomeTextura}) - ${nomeRecheio}${nomeCobertura}\n`;
           }
-          const ovoUnico = item.ovos?.[0];
-          if (ovoUnico) {
-            addLine("Recheio", getNomeOpcao("recheio", ovoUnico.recheio));
-            if (item.tipoOvo === "colher" && ovoUnico.cobertura) {
-              addLine("Topper/Cobertura", getNomeOpcao("cobertura", ovoUnico.cobertura));
-            }
+        });
+      } else {
+        // Ovo único
+        if (item.kit && item.kit !== "unidade") {
+          addLine("Formato", getNomeOpcao("kit", item.kit));
+        }
+        
+        // Casca (já adicionada acima globalmente para o item, 
+        // mas vamos garantir que apareça aqui se não aparecer em cima)
+        // addLine("Sabor da Casca", getNomeOpcao("saborCasca", item.saborCasca));
+        // addLine("Textura da Casca", getNomeOpcao("tipoCasca", item.tipoCasca));
+
+        const ovoUnico = item.ovos?.[0];
+        if (ovoUnico && item.tipoOvo !== "tradicional") {
+          addLine("Recheio", getNomeOpcao("recheio", ovoUnico.recheio));
+          if (item.tipoOvo === "colher" && ovoUnico.cobertura) {
+            addLine("Topper/Cobertura", getNomeOpcao("cobertura", ovoUnico.cobertura));
           }
         }
       }
@@ -163,20 +176,26 @@ export default function Checkout() {
                           </span>
                         </div>
                       )}
-                      <div className="flex justify-between border-b border-rose-50 pb-2">
-                        <span className="font-sans opacity-70">
-                          Sabor da Casca:
-                        </span>
-                        <span className="text-[#5A2C1D] font-bold">
-                          {getNomeOpcao("saborCasca", item.saborCasca)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between border-b border-rose-50 pb-2">
-                        <span className="font-sans opacity-70">Textura:</span>
-                        <span className="text-[#5A2C1D] font-bold">
-                          {getNomeOpcao("tipoCasca", item.tipoCasca)}
-                        </span>
-                      </div>
+                      
+                      {/* Mostrar Casca no topo apenas se NÃO for kit multi */}
+                      {!(item.ovos && item.ovos.length > 1) && (
+                        <>
+                          <div className="flex justify-between border-b border-rose-50 pb-2">
+                            <span className="font-sans opacity-70">
+                              Sabor da Casca:
+                            </span>
+                            <span className="text-[#5A2C1D] font-bold">
+                              {getNomeOpcao("saborCasca", item.saborCasca)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between border-b border-rose-50 pb-2">
+                            <span className="font-sans opacity-70">Textura:</span>
+                            <span className="text-[#5A2C1D] font-bold">
+                              {getNomeOpcao("tipoCasca", item.tipoCasca)}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Ovos do kit — exibição individual */}
@@ -187,30 +206,36 @@ export default function Checkout() {
                             <p className="text-[10px] uppercase tracking-widest font-black text-[#E5989B] mb-2">
                               Composição do Kit
                             </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {item.ovos.map((ovo, i) => {
-                                const nomeRecheio = recheios.find((r) => r.id === ovo.recheio)?.nome || "—";
-                                const nomeCobertura = ovo.cobertura
-                                  ? coberturas.find((c) => c.id === ovo.cobertura)?.nome
-                                  : null;
-                                return (
-                                  <div
-                                    key={i}
-                                    className="flex items-start gap-2 bg-rose-50/60 rounded-xl px-3 py-2 ring-1 ring-rose-100"
-                                  >
-                                    <span className="w-5 h-5 bg-[#E5989B] text-white rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
-                                      {i + 1}
-                                    </span>
-                                    <div className="text-xs">
-                                      <span className="font-bold text-[#5A2C1D]">{nomeRecheio}</span>
-                                      {nomeCobertura && (
-                                        <span className="text-[#8C7A70]"> + {nomeCobertura}</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                               {item.ovos.map((ovo, i) => {
+                                 const nomeSabor = getNomeOpcao("saborCasca", ovo.saborCasca);
+                                 const nomeTextura = getNomeOpcao("tipoCasca", ovo.tipoCasca);
+                                 const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
+                                 const nomeCobertura = ovo.cobertura
+                                   ? getNomeOpcao("cobertura", ovo.cobertura)
+                                   : null;
+                                 return (
+                                   <div
+                                     key={i}
+                                     className="flex items-start gap-2 bg-rose-50/60 rounded-xl px-3 py-2 ring-1 ring-rose-100"
+                                   >
+                                     <span className="w-5 h-5 bg-[#E5989B] text-white rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
+                                       {i + 1}
+                                     </span>
+                                     <div className="text-xs">
+                                       <div className="font-bold text-[#5A2C1D]">
+                                         {nomeSabor} ({nomeTextura})
+                                       </div>
+                                       {item.tipoOvo !== "tradicional" && (
+                                         <div className="text-[#8C7A70] mt-0.5">
+                                           {nomeRecheio}{nomeCobertura && ` + ${nomeCobertura}`}
+                                         </div>
+                                       )}
+                                     </div>
+                                   </div>
+                                 );
+                               })}
+                             </div>
                           </>
                         ) : (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 text-sm text-[#8C7A70]">
