@@ -1,9 +1,8 @@
-// src/context/CartContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { calcularPrecoTotal } from '../data/options';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { calcularPrecoTotal } from "../data/options";
 
 const CartContext = createContext();
-const CART_KEY = 'bree_pascoa_cart';
+const CART_KEY = "bree_pascoa_cart";
 const EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 horas
 
 export function CartProvider({ children }) {
@@ -23,30 +22,56 @@ export function CartProvider({ children }) {
   });
 
   useEffect(() => {
-    localStorage.setItem(CART_KEY, JSON.stringify({ items: cart, timestamp: Date.now() }));
+    localStorage.setItem(
+      CART_KEY,
+      JSON.stringify({ items: cart, timestamp: Date.now() }),
+    );
   }, [cart]);
 
   const addToCart = (pedido, precoTotal) => {
-    // Usar functional updater para evitar stale closure — sempre usa o estado mais recente
-    const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
-    setCart((prev) => [...prev, { ...pedido, precoTotal, id: generateId() }]);
+    const generateId = () =>
+      Date.now().toString(36) + Math.random().toString(36).substr(2);
+    setCart((prev) => [
+      ...prev,
+      { ...pedido, precoTotal, id: generateId(), quantity: 1 },
+    ]);
+  };
+
+  const updateQuantity = (id, delta) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const newQuantity = Math.max(1, (item.quantity || 1) + delta);
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      }),
+    );
   };
 
   const removeFromCart = (id) => {
-    setCart((prev) => prev.filter(item => item.id !== id));
+    setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
   const clearCart = () => {
     setCart([]);
   };
 
-  // Recalcular o total dinamicamente — sem fallback para forçar detecção de bugs
   const totalCarrinho = cart.reduce((acc, item) => {
-    return acc + calcularPrecoTotal(item);
+    return acc + calcularPrecoTotal(item) * (item.quantity || 1);
   }, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, totalCarrinho }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        updateQuantity,
+        totalCarrinho,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -55,7 +80,7 @@ export function CartProvider({ children }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 }

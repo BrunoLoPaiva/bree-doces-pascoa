@@ -9,30 +9,30 @@ import {
   MessageCircle,
   ArrowLeft,
   Plus,
+  Minus,
   AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const { cart, removeFromCart, clearCart, updateQuantity, totalCarrinho } =
+    useCart();
   const navigate = useNavigate();
   const whatsapp = "5514996917274";
   const [confirming, setConfirming] = useState(false);
-
-  // Recalcular preços dinâmicamente ao finalizar (ignora preço guardado)
-  const totalCarrinhoAtual = cart.reduce(
-    (acc, item) => acc + calcularPrecoTotal(item),
-    0
-  );
 
   function finalizarPedido() {
     let msg =
       "*Olá, Bree Doces!* Gostaria de fazer o meu pedido de Páscoa:\n\n";
 
     cart.forEach((item, index) => {
+      const qtd = item.quantity || 1;
       const nomeTamanho = getNomeOpcao("tamanho", item.tamanho);
       const nomeTipo = getNomeOpcao("tipoOvo", item.tipoOvo);
-      msg += `*ITEM #${index + 1} - ${nomeTamanho} ${nomeTipo}*\n`;
+      const precoUnitario = calcularPrecoTotal(item);
+      const subtotalItem = precoUnitario * qtd;
+
+      msg += `*ITEM #${index + 1} - ${qtd}x ${nomeTamanho} ${nomeTipo}*\n`;
 
       const addLine = (label, value) => {
         if (value) msg += `*${label}:* ${value}\n`;
@@ -40,11 +40,16 @@ export default function Checkout() {
 
       const isKitMulti = item.ovos && item.ovos.length > 1;
 
-      // Casca (apenas para ovo único)
       if (!isKitMulti) {
         const ovoUnico = item.ovos?.[0] || {};
-        addLine("Sabor da Casca", getNomeOpcao("saborCasca", ovoUnico.saborCasca || item.saborCasca));
-        addLine("Textura da Casca", getNomeOpcao("tipoCasca", ovoUnico.tipoCasca || item.tipoCasca));
+        addLine(
+          "Sabor da Casca",
+          getNomeOpcao("saborCasca", ovoUnico.saborCasca || item.saborCasca),
+        );
+        addLine(
+          "Textura da Casca",
+          getNomeOpcao("tipoCasca", ovoUnico.tipoCasca || item.tipoCasca),
+        );
       }
 
       if (isKitMulti) {
@@ -57,44 +62,30 @@ export default function Checkout() {
           const nomeCobertura = ovo.cobertura
             ? ` + ${getNomeOpcao("cobertura", ovo.cobertura)}`
             : "";
-
-          if (item.tipoOvo === "tradicional") {
-            msg += `  Ovo ${i + 1}: ${nomeSabor} (${nomeTextura})\n`;
-          } else {
-            msg += `  Ovo ${i + 1}: ${nomeSabor} (${nomeTextura}) - ${nomeRecheio}${nomeCobertura}\n`;
-          }
+          msg += `  Ovo ${i + 1}: ${nomeSabor} (${nomeTextura})${item.tipoOvo !== "tradicional" ? ` - ${nomeRecheio}${nomeCobertura}` : ""}\n`;
         });
       } else {
-        if (item.kit && item.kit !== "unidade") {
-          addLine("Formato", getNomeOpcao("kit", item.kit));
-        }
-
         const ovoUnico = item.ovos?.[0];
         if (ovoUnico && item.tipoOvo !== "tradicional") {
           addLine("Recheio", getNomeOpcao("recheio", ovoUnico.recheio));
           if (item.tipoOvo === "colher" && ovoUnico.cobertura) {
-            addLine("Topper/Cobertura", getNomeOpcao("cobertura", ovoUnico.cobertura));
+            addLine(
+              "Topper/Cobertura",
+              getNomeOpcao("cobertura", ovoUnico.cobertura),
+            );
           }
         }
       }
 
-      // Usar preço recalculado dinamicamente
-      const precoAtual = calcularPrecoTotal(item);
-      msg += `Subtotal: R$ ${precoAtual.toFixed(2).replace(".", ",")}\n\n`;
+      msg += `Subtotal: R$ ${subtotalItem.toFixed(2).replace(".", ",")} (${qtd}x R$ ${precoUnitario.toFixed(2).replace(".", ",")})\n\n`;
     });
 
     msg += `----------------------------------\n`;
-    msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinhoAtual.toFixed(2).replace(".", ",")}*\n\n`;
+    msg += `*TOTAL DO PEDIDO: R$ ${totalCarrinho.toFixed(2).replace(".", ",")}*\n\n`;
     msg += `Aguardando confirmação e dados para pagamento!`;
 
-    // Dispara o redirecionamento primeiro
     window.location.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
-    
-    // Limpa o carrinho após 2 segundos (dá tempo do navegador processar a saída da página
-    // ou o pop-up de "Abrir WhatsApp" do dispositivo, sem perder o pedido se cancelar)
-    setTimeout(() => {
-      clearCart();
-    }, 2000);
+    setTimeout(() => clearCart(), 2000);
   }
 
   if (cart.length === 0) {
@@ -112,9 +103,6 @@ export default function Checkout() {
           <h1 className="text-4xl font-bold tracking-tighter mb-4 text-[#5A2C1D]">
             Sua cesta está vazia
           </h1>
-          <p className="text-[#8C7A70] mb-10 max-w-sm mx-auto text-lg font-light leading-relaxed">
-            Você ainda não adicionou nenhuma doçura ao seu pedido.
-          </p>
           <button
             onClick={() => navigate("/builder")}
             className="group bg-[#E5989B] text-white px-8 py-4 rounded-full font-bold hover:bg-[#d88689] flex items-center gap-3 mx-auto shadow-lg shadow-rose-200/50"
@@ -161,7 +149,7 @@ export default function Checkout() {
                 Você será redirecionado ao WhatsApp para confirmar seu pedido.
               </p>
               <p className="text-[#E5989B] font-bold text-lg mb-6">
-                Total: R$ {totalCarrinhoAtual.toFixed(2).replace(".", ",")}
+                Total: R$ {totalCarrinho.toFixed(2).replace(".", ",")}
               </p>
               <div className="flex gap-3">
                 <button
@@ -177,8 +165,7 @@ export default function Checkout() {
                   }}
                   className="flex-1 py-3 rounded-full bg-[#25D366] text-white font-bold hover:bg-[#1fb355] transition-colors flex items-center justify-center gap-2"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  Enviar
+                  <MessageCircle className="w-4 h-4" /> Enviar
                 </button>
               </div>
             </motion.div>
@@ -194,9 +181,7 @@ export default function Checkout() {
             </h1>
             <p className="text-[#8C7A70] mt-2 font-sans italic">
               {cart.length}{" "}
-              {cart.length === 1
-                ? "item selecionado com carinho"
-                : "itens selecionados com carinho"}
+              {cart.length === 1 ? "item selecionado" : "itens selecionados"}
             </p>
           </div>
           <button
@@ -216,7 +201,7 @@ export default function Checkout() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="bg-white rounded-[2.5rem] p-8 relative group border border-rose-50 shadow-sm hover:shadow-md transition-all"
+                className="bg-white rounded-[2.5rem] p-8 relative border border-rose-50 shadow-sm"
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                   <div className="flex-1">
@@ -239,8 +224,6 @@ export default function Checkout() {
                           </span>
                         </div>
                       )}
-
-                      {/* Casca no topo apenas para ovo único */}
                       {!(item.ovos && item.ovos.length > 1) && (
                         <>
                           <div className="flex justify-between border-b border-rose-50 pb-2">
@@ -248,91 +231,116 @@ export default function Checkout() {
                               Sabor da Casca:
                             </span>
                             <span className="text-[#5A2C1D] font-bold">
-                              {getNomeOpcao("saborCasca", item.ovos?.[0]?.saborCasca || item.saborCasca)}
+                              {getNomeOpcao(
+                                "saborCasca",
+                                item.ovos?.[0]?.saborCasca || item.saborCasca,
+                              )}
                             </span>
                           </div>
                           <div className="flex justify-between border-b border-rose-50 pb-2">
-                            <span className="font-sans opacity-70">Textura:</span>
+                            <span className="font-sans opacity-70">
+                              Textura:
+                            </span>
                             <span className="text-[#5A2C1D] font-bold">
-                              {getNomeOpcao("tipoCasca", item.ovos?.[0]?.tipoCasca || item.tipoCasca)}
+                              {getNomeOpcao(
+                                "tipoCasca",
+                                item.ovos?.[0]?.tipoCasca || item.tipoCasca,
+                              )}
                             </span>
                           </div>
                         </>
                       )}
                     </div>
 
-                    {/* Ovos do kit — exibição individual */}
                     {item.tipoOvo !== "tradicional" && item.ovos && (
                       <div className="mt-4">
                         {item.ovos.length > 1 ? (
-                          <>
-                            <p className="text-[10px] uppercase tracking-widest font-black text-[#E5989B] mb-2">
-                              Composição do Kit
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {item.ovos.map((ovo, i) => {
-                                const nomeSabor = getNomeOpcao("saborCasca", ovo.saborCasca);
-                                const nomeTextura = getNomeOpcao("tipoCasca", ovo.tipoCasca);
-                                const nomeRecheio = getNomeOpcao("recheio", ovo.recheio);
-                                const nomeCobertura = ovo.cobertura
-                                  ? getNomeOpcao("cobertura", ovo.cobertura)
-                                  : null;
-                                return (
-                                  <div
-                                    key={i}
-                                    className="flex items-start gap-2 bg-rose-50/60 rounded-xl px-3 py-2 ring-1 ring-rose-100"
-                                  >
-                                    <span className="w-5 h-5 bg-[#E5989B] text-white rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
-                                      {i + 1}
-                                    </span>
-                                    <div className="text-xs">
-                                      <div className="font-bold text-[#5A2C1D]">
-                                        {nomeSabor} ({nomeTextura})
-                                      </div>
-                                      {item.tipoOvo !== "tradicional" && (
-                                        <div className="text-[#8C7A70] mt-0.5">
-                                          {nomeRecheio}{nomeCobertura && ` + ${nomeCobertura}`}
-                                        </div>
-                                      )}
-                                    </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {item.ovos.map((ovo, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-2 bg-rose-50/60 rounded-xl px-3 py-2 ring-1 ring-rose-100"
+                              >
+                                <span className="w-5 h-5 bg-[#E5989B] text-white rounded-full flex items-center justify-center text-[10px] font-black mt-0.5">
+                                  {i + 1}
+                                </span>
+                                <div className="text-xs">
+                                  <div className="font-bold text-[#5A2C1D]">
+                                    {getNomeOpcao("saborCasca", ovo.saborCasca)}{" "}
+                                    ({getNomeOpcao("tipoCasca", ovo.tipoCasca)})
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </>
+                                  <div className="text-[#8C7A70]">
+                                    {getNomeOpcao("recheio", ovo.recheio)}
+                                    {ovo.cobertura &&
+                                      ` + ${getNomeOpcao("cobertura", ovo.cobertura)}`}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         ) : (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 text-sm text-[#8C7A70]">
                             <div className="flex justify-between border-b border-rose-50 pb-2">
-                              <span className="font-sans opacity-70">Recheio:</span>
+                              <span className="font-sans opacity-70">
+                                Recheio:
+                              </span>
                               <span className="text-[#5A2C1D] font-bold">
                                 {getNomeOpcao("recheio", item.ovos[0]?.recheio)}
                               </span>
                             </div>
-                            {item.tipoOvo === "colher" && item.ovos[0]?.cobertura && (
-                              <div className="flex justify-between border-b border-rose-50 pb-2">
-                                <span className="font-sans opacity-70">Cobertura:</span>
-                                <span className="text-[#5A2C1D] font-bold">
-                                  {getNomeOpcao("cobertura", item.ovos[0]?.cobertura)}
-                                </span>
-                              </div>
-                            )}
+                            {item.tipoOvo === "colher" &&
+                              item.ovos[0]?.cobertura && (
+                                <div className="flex justify-between border-b border-rose-50 pb-2">
+                                  <span className="font-sans opacity-70">
+                                    Cobertura:
+                                  </span>
+                                  <span className="text-[#5A2C1D] font-bold">
+                                    {getNomeOpcao(
+                                      "cobertura",
+                                      item.ovos[0]?.cobertura,
+                                    )}
+                                  </span>
+                                </div>
+                              )}
                           </div>
                         )}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between md:flex-col md:items-end gap-6 min-w-[140px]">
+                  <div className="flex flex-col items-center md:items-end gap-6 min-w-[160px]">
                     <div className="text-3xl font-bold text-[#E5989B]">
-                      R$ {calcularPrecoTotal(item).toFixed(2).replace(".", ",")}
+                      R${" "}
+                      {(calcularPrecoTotal(item) * (item.quantity || 1))
+                        .toFixed(2)
+                        .replace(".", ",")}
                     </div>
-                    {/* Botão de lixeira sempre visível (inclusive mobile) */}
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="p-4 text-rose-200 hover:text-red-400 transition-colors bg-rose-50/50 rounded-2xl"
-                    >
-                      <Trash2 className="w-6 h-6" />
-                    </button>
+
+                    <div className="flex items-center gap-3 bg-rose-50/50 p-2 rounded-2xl border border-rose-100">
+                      <button
+                        onClick={() =>
+                          item.quantity > 1
+                            ? updateQuantity(item.id, -1)
+                            : removeFromCart(item.id)
+                        }
+                        className="p-2 hover:bg-white rounded-xl transition-colors text-[#E5989B]"
+                      >
+                        {item.quantity > 1 ? (
+                          <Minus className="w-5 h-5" />
+                        ) : (
+                          <Trash2 className="w-5 h-5 text-red-400" />
+                        )}
+                      </button>
+                      <span className="font-bold text-lg min-w-[24px] text-center">
+                        {item.quantity || 1}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.id, 1)}
+                        className="p-2 hover:bg-white rounded-xl transition-colors text-[#E5989B]"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -340,48 +348,26 @@ export default function Checkout() {
           </AnimatePresence>
         </div>
 
-        <div className="bg-white p-10 md:p-12 rounded-[3.5rem] border border-rose-100 shadow-2xl relative overflow-hidden">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-12 relative z-10">
+        <div className="bg-white p-10 rounded-[3.5rem] border border-rose-100 shadow-2xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-12">
             <div>
               <span className="text-[#8C7A70] uppercase tracking-[0.2em] text-xs font-black mb-3 block opacity-60">
                 Total do Pedido
               </span>
               <div className="text-5xl md:text-7xl font-bold text-[#E5989B]">
-                R$ {totalCarrinhoAtual.toFixed(2).replace(".", ",")}
+                R$ {totalCarrinho.toFixed(2).replace(".", ",")}
               </div>
             </div>
-            <div className="flex flex-col gap-5 w-full md:w-auto md:min-w-[280px]">
+            <div className="flex flex-col gap-5 w-full md:w-auto">
               <motion.button
                 onClick={() => setConfirming(true)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-[#25D366] text-white py-5 px-10 rounded-full font-black text-xl shadow-xl flex items-center justify-center gap-4 hover:bg-[#1fb355] transition-all"
+                className="bg-[#25D366] text-white py-5 px-10 rounded-full font-black text-xl shadow-xl flex items-center justify-center gap-4 hover:bg-[#1fb355] transition-all"
               >
                 <MessageCircle className="w-7 h-7" /> Finalizar pedido
               </motion.button>
-
-              {/* Quebra de Objeções */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs md:text-sm text-[#8C7A70] font-medium">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-lg">💳</span>
-                  Aceitamos Pix, Cartões de Débito e Crédito (sujeito a taxas
-                  das operadoras).
-                </div>
-                <div className="hidden sm:block opacity-20">|</div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-lg">💵</span>
-                  Confirmação do pedido mediante pagamento de 50% do valor total.
-                </div>
-                <div className="hidden sm:block opacity-20">|</div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-lg">🛵</span>
-                  Consulte a taxa de entrega ou retire no local
-                </div>
-              </div>
-
               <button
                 onClick={() => navigate("/builder")}
-                className="text-[#8C7A70] hover:text-[#E5989B] font-bold flex items-center justify-center gap-2 mt-2"
+                className="text-[#8C7A70] hover:text-[#E5989B] font-bold flex items-center justify-center gap-2"
               >
                 <Plus className="w-5 h-5" /> Adicionar outro ovo
               </button>
