@@ -1,7 +1,12 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export default function OptionCard({ option, selected, onClick, className = "" }) {
+export default function OptionCard({
+  option,
+  selected,
+  onClick,
+  className = "",
+}) {
   const [imgError, setImgError] = useState(false);
 
   return (
@@ -35,7 +40,7 @@ export default function OptionCard({ option, selected, onClick, className = "" }
         </h3>
         {option.preco > 0 && (
           <span className="text-[10px] xl:text-xs text-[#5A2C1D] font-bold px-2 py-0.5 bg-rose-100 rounded-full">
-            + R$ {option.preco.toFixed(2).replace('.', ',')}
+            + R$ {option.preco.toFixed(2).replace(".", ",")}
           </span>
         )}
       </div>
