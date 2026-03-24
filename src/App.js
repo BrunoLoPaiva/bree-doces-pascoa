@@ -15,7 +15,7 @@ export default function App() {
     <ErrorBoundary>
       <CartProvider>
         <BrowserRouter>
-          <div className="relative min-h-screen flex flex-col font-sans text-stone-800">
+          <div className="relative min-h-screen flex flex-col font-sans text-stone-800 pb-[10%]">
             <BackgroundElevator />
 
             <Routes>
