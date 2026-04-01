@@ -76,6 +76,7 @@ export default function Hero() {
             <a
               href="https://instagram.com/bree_doces"
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 text-[#E5989B] font-semibold hover:opacity-80 transition"
             >
               <Instagram size={20} />
@@ -86,6 +87,7 @@ export default function Hero() {
             <a
               href="https://wa.me/5514996917274"
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 text-[#E5989B] font-semibold hover:opacity-80 transition"
             >
               <Phone size={20} />
