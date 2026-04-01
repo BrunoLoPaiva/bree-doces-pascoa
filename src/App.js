@@ -2,9 +2,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 
 import Home from "./pages/Home";
-import Builder from "./pages/Builder";
-import Checkout from "./pages/Checkout";
+// import Builder from "./pages/Builder";
+// import Checkout from "./pages/Checkout";
 import BackgroundElevator from "./components/BackgroundElevator";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // 1. Importar o ErrorBoundary
 import ErrorBoundary from "./components/ErrorBoundary";
